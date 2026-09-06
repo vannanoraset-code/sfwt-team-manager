@@ -12,7 +12,7 @@ label{font-size:12px;color:var(--muted);font-weight:700;display:block;margin:7px
 .modal{position:fixed;inset:0;background:#0008;z-index:50;display:none;align-items:flex-end}.modal.show{display:flex}.sheet{width:100%;background:#fff;border-radius:20px 20px 0 0;max-height:90vh;overflow:auto;padding:14px max(16px,env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}.sheetHead{position:sticky;top:-14px;background:#fff;z-index:2;padding:8px 0;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}.sheetHead h3{margin:0}.closeBtn{border:0;background:#eef3f8;color:var(--navy);border-radius:10px;padding:9px 12px;font-weight:900}.photoGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.photoTile{position:relative}.photoTile img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;border:1px solid var(--line)}.photoTile button{position:absolute;right:4px;top:4px;border:0;border-radius:8px;background:#0009;color:#fff}.langMM{font-size:11px;color:#728298;display:block;margin-top:1px}
 @media(max-width:760px){.cards{grid-template-columns:repeat(2,1fr)}.grid2,.grid3{grid-template-columns:1fr}.teamGrid{grid-template-columns:1fr}.brand h1{font-size:17px}.brand small{font-size:11px}.pageTitle h2{font-size:20px}.bottomNav{height:72px}.org{min-width:900px}}
 @media print{header,.bottomNav,.noPrint{display:none!important}main{padding:0}.page{display:none!important}.page#printPage{display:block!important}}
-</style><meta name="sfwt-version" content="v45-compact-visual-export-fontfix"></head><body>
+</style><meta name="sfwt-version" content="v46-thai-export-clean"></head><body>
 <header><div class="brand"><img src="sft-logo.jpg"><div><h1>SFW&T บริหารทีมงาน</h1><small>บริษัท ศักวิเศษ เฟรม แอนด์ ทรัส จำกัด</small></div><div class="topActions"><button class="iconBtn" onclick="toggleLang()" id="langBtn">TH / မြန်မာ</button></div></div></header>
 <main>
 <section class="page active" id="dashboardPage"><div class="pageTitle"><h2>ภาพรวม <span class="langMM">အကျဉ်းချုပ်</span></h2><button class="btn navy" onclick="exportPlan()">🖼️ ส่งออกรูป</button></div><div class="cards" id="stats"></div><div class="panel"><h3>งานวันนี้ <span class="langMM">ယနေ့အလုပ်အစီအစဉ်</span></h3><div id="todaySummary"></div></div><div class="panel"><h3>ชุดทำงานทั้งหมด</h3><div id="dashboardTeams" class="teamGrid"></div></div></section>
@@ -149,8 +149,8 @@ function snapshotCurrentPlan(){
   return {
     date:state.plan.date||new Date().toISOString().slice(0,10),
     savedAt:new Date().toISOString(),
-    site:state.plan.site||'',
-    overall:state.plan.overall||'',
+    site:exportText(state.plan.site||''),
+    overall:exportText(state.plan.overall||''),
     overallMM:state.plan.overallMM||'',
     teams:deepCopy(orderedTeams()),
     activeIds,presentIds,absentIds
@@ -179,15 +179,15 @@ async function viewHistory(date){
     let peopleHtml='';
     for(let st of people){
       let pic=await imageSrc('staff:'+st.id);
-      peopleHtml+=`<div style="display:flex;align-items:center;gap:8px">${pic?`<img src="${pic}" style="width:48px;height:48px;border-radius:50%;object-fit:cover">`:`<div class="avatar placeholder" style="width:48px;height:48px">${esc((st.nick||st.name).slice(0,1))}</div>`}<div><b>${esc(st.nick||st.name)}</b><small style="display:block">${esc(st.role||'')}</small></div></div>`;
+      peopleHtml+=`<div style="display:flex;align-items:center;gap:8px">${pic?`<img src="${pic}" style="width:48px;height:48px;border-radius:50%;object-fit:cover">`:`<div class="avatar placeholder" style="width:48px;height:48px">${esc((st.nick||st.name).slice(0,1))}</div>`}<div><b>${esc(st.nick||st.name)}</b><small style="display:block">${esc(exportText(st.role||''))}</small></div></div>`;
     }
     let machHtml='';
     for(let id of (t.machines||[])){
       let m=machBy(id);if(!m)continue;
       let pics=(await imgGet('machine:'+id))||[];
-      machHtml+=`<div style="display:flex;align-items:center;gap:8px">${pics[0]?`<img src="${pics[0]}" style="width:70px;height:52px;border-radius:8px;object-fit:cover">`:`<div class="avatar placeholder" style="width:70px;height:52px;border-radius:8px">⚙️</div>`}<div><b>${esc(m.name)}</b><small style="display:block">${esc(m.code||m.type||'')}</small></div></div>`;
+      machHtml+=`<div style="display:flex;align-items:center;gap:8px">${pics[0]?`<img src="${pics[0]}" style="width:70px;height:52px;border-radius:8px;object-fit:cover">`:`<div class="avatar placeholder" style="width:70px;height:52px;border-radius:8px">⚙️</div>`}<div><b>${esc(m.name)}</b><small style="display:block">${esc(exportText(m.code||m.type||''))}</small></div></div>`;
     }
-    cards.push(`<div class=panel style="margin:8px 0"><b>ชุด ${esc(t.id)} • ${esc(t.name||'')}</b><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px">${peopleHtml}</div><div style="display:grid;gap:8px;margin-top:8px">${machHtml}</div><div style="margin-top:8px"><b>งาน:</b> ${esc(t.plan||'-')}</div></div>`);
+    cards.push(`<div class=panel style="margin:8px 0"><b>ชุด ${esc(t.id)} • ${esc(t.name||'')}</b><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px">${peopleHtml}</div><div style="display:grid;gap:8px;margin-top:8px">${machHtml}</div><div style="margin-top:8px"><b>งาน:</b> ${esc(exportText(t.plan||'-'))}</div></div>`);
   }
   openModal('ประวัติ '+date,`<div><b>${esc(h.site||'ยังไม่ระบุไซต์')}</b><div class=muted>${esc(h.overall||'')}</div></div>
     <div class=panel style="margin-top:10px"><b>หยุดงาน ${absent.length} คน</b><div>${absent.length?absent.map(st=>esc(st.nick||st.name)).join(' • '):'ไม่มี'}</div></div>
@@ -260,7 +260,7 @@ async function saveTeamEditor(id){
   t.name=document.getElementById('tName').value.trim();t.zone='';t.leader=leader;t.members=members;t.machines=machines;
   t.plan=document.getElementById('tPlan').value;t.planMM=await translateTH(t.plan);saveHistorySnapshot();closeModal();save()
 }
-async function teamCard(t,edit=false){let lead=staffBy(t.leader),lp=lead?await imageSrc('staff:'+lead.id):'',people=[];for(let id of t.members){let s=staffBy(id);if(!s)continue;let p=await imageSrc('staff:'+id);people.push(`<div class=chip>${p?`<img src="${p}">`:`<span>👷</span>`}${esc(s.nick||s.name)}</div>`)}let ms=[];for(let id of t.machines){let m=machBy(id);if(!m)continue;let pics=(await imgGet('machine:'+id))||[];ms.push(`<div class=machMini>${pics[0]?`<img src="${pics[0]}">`:`<div class="thumb placeholder">🏗️</div>`}<div class=grow><b>${esc(m.name)}</b><span class=langMM>${esc(m.nameMM||'')}</span></div></div>`)}return `<div class="teamCard"><div class=teamHead><div><span class="tag">${esc(t.id)}</span><h3 style="margin:5px 0">${esc(t.name)}</h3><div class=muted>${lead?`หัวหน้า: ${esc(lead.nick||lead.name)} / ${esc(lead.name)}`:'ยังไม่เลือกหัวหน้า'}</div></div>${edit?`<button class=btn onclick="openTeamEditor('${t.id}')">✏️ ปรับทีม</button>`:''}</div>${lead?`<div class=personCard style="margin-top:8px">${lp?`<img class=avatar src="${lp}">`:`<div class="avatar placeholder">${esc((lead.nick||lead.name).slice(0,2))}</div>`}<div class=grow><b>${esc(lead.nick||'')} ${esc(lead.name)}</b><small>${esc(lead.role)}</small><span class=langMM>${esc(lead.roleMM||'')}</span></div></div>`:''}<div class=teamPeople>${people.join('')||'<span class=muted>ยังไม่มีลูกทีม</span>'}</div><div class=machList>${ms.join('')||'<span class=muted>ยังไม่มีเครื่องจักร</span>'}</div><div class=planBox><b>งาน:</b> ${esc(t.plan||'-')}<span class=langMM>${esc(t.planMM||'')}</span></div></div>`}
+async function teamCard(t,edit=false){let lead=staffBy(t.leader),lp=lead?await imageSrc('staff:'+lead.id):'',people=[];for(let id of t.members){let s=staffBy(id);if(!s)continue;let p=await imageSrc('staff:'+id);people.push(`<div class=chip>${p?`<img src="${p}">`:`<span>👷</span>`}${esc(s.nick||s.name)}</div>`)}let ms=[];for(let id of t.machines){let m=machBy(id);if(!m)continue;let pics=(await imgGet('machine:'+id))||[];ms.push(`<div class=machMini>${pics[0]?`<img src="${pics[0]}">`:`<div class="thumb placeholder">🏗️</div>`}<div class=grow><b>${esc(m.name)}</b><span class=langMM>${esc(m.nameMM||'')}</span></div></div>`)}return `<div class="teamCard"><div class=teamHead><div><span class="tag">${esc(t.id)}</span><h3 style="margin:5px 0">${esc(t.name)}</h3><div class=muted>${lead?`หัวหน้า: ${esc(lead.nick||lead.name)} / ${esc(lead.name)}`:'ยังไม่เลือกหัวหน้า'}</div></div>${edit?`<button class=btn onclick="openTeamEditor('${t.id}')">✏️ ปรับทีม</button>`:''}</div>${lead?`<div class=personCard style="margin-top:8px">${lp?`<img class=avatar src="${lp}">`:`<div class="avatar placeholder">${esc((lead.nick||lead.name).slice(0,2))}</div>`}<div class=grow><b>${esc(lead.nick||'')} ${esc(lead.name)}</b><small>${esc(lead.role)}</small><span class=langMM>${esc(lead.roleMM||'')}</span></div></div>`:''}<div class=teamPeople>${people.join('')||'<span class=muted>ยังไม่มีลูกทีม</span>'}</div><div class=machList>${ms.join('')||'<span class=muted>ยังไม่มีเครื่องจักร</span>'}</div><div class=planBox><b>งาน:</b> ${esc(exportText(t.plan||'-'))}<span class=langMM>${esc(t.planMM||'')}</span></div></div>`}
 async function renderTeams(){
   let e=[];for(let t of orderedTeams())e.push(await teamCard(t,true));
   document.getElementById('teamEditorGrid').innerHTML=e.join('');
@@ -270,8 +270,8 @@ async function renderTeams(){
 function loadPlanForm(){
   let d=document.getElementById('planDate'),site=document.getElementById('planSite'),ov=document.getElementById('planOverall'),mm=document.getElementById('planOverallMM');
   if(d)d.value=state.plan.date||'';
-  if(site)site.value=state.plan.site||'';
-  if(ov)ov.value=state.plan.overall||'';
+  if(site)site.value=exportText(state.plan.site||'');
+  if(ov)ov.value=exportText(state.plan.overall||'');
   if(mm)mm.value=state.plan.overallMM||'';
   let ed=document.getElementById('teamPlanEditors');
   if(ed)ed.innerHTML='';
@@ -301,7 +301,7 @@ async function renderOrg(){
     for(let id of (t.machines||[])){
       let m=machBy(id); if(!m)continue;
       let pics=(await imgGet('machine:'+id))||[];
-      mach.push(`<div class=orgMember>${pics[0]?`<img src="${pics[0]}">`:`<div class="avatar placeholder" style="width:36px;height:36px">⚙️</div>`}<div><b>${esc(m.name)}</b><small>${esc(m.code||m.type||'')}</small></div></div>`);
+      mach.push(`<div class=orgMember>${pics[0]?`<img src="${pics[0]}">`:`<div class="avatar placeholder" style="width:36px;height:36px">⚙️</div>`}<div><b>${esc(m.name)}</b><small>${esc(exportText(m.code||m.type||''))}</small></div></div>`);
     }
     cards.push(`<div class=orgTeam>
       <div class=orgLeader>${lp?`<img src="${lp}">`:`<div class="avatar placeholder" style="width:58px;height:58px">${l?esc((l.nick||l.name).slice(0,2)):'?'}</div>`}
@@ -309,12 +309,18 @@ async function renderOrg(){
       </div>
       <div class=orgMembers>${mem.join('')}</div>
       <div class=orgMembers>${mach.join('')}</div>
-      <div class=panel style="margin-top:8px"><b>งาน:</b> ${esc(t.plan||'-')}<div class=langMM>${esc(t.planMM||'')}</div></div>
+      <div class=panel style="margin-top:8px"><b>งาน:</b> ${esc(exportText(t.plan||'-'))}<div class=langMM>${esc(t.planMM||'')}</div></div>
     </div>`);
   }
   document.getElementById('orgChart').innerHTML=`<div class=orgCEO>${ap?`<img src="${ap}">`:`<div class="avatar placeholder" style="width:78px;height:78px">CEO</div>`}<div><h2 style="margin:0">${esc(state.admin.name)}</h2><b>${esc(state.admin.role)}</b></div></div>
-  <div class="zoneTitle"><b>ชุดทำงาน ${state.teams.length} ชุด</b> • ${esc(state.plan.date||'')} • ${esc(state.plan.site||'')}</div>
+  <div class="zoneTitle"><b>ชุดทำงาน ${state.teams.length} ชุด</b> • ${esc(state.plan.date||'')} • ${esc(exportText(state.plan.site||''))}</div>
   <div class=orgTeams>${cards.join('')||'<div class=muted>ยังไม่มีชุดทำงาน</div>'}</div>`;
+}
+function exportText(v){
+  return String(v||'')
+    .replace(/[\u1000-\u109F\uAA60-\uAA7F\uA9E0-\uA9FF]/g,'')
+    .replace(/\s{2,}/g,' ')
+    .trim();
 }
 function loadCanvasImage(src){
   return new Promise(resolve=>{
@@ -339,7 +345,7 @@ function drawWrapped(ctx,text,x,y,maxWidth,lineHeight,maxLines=3){
 }
 async function exportElement(kind){
   const teams=orderedTeams(), used=new Set(assignedStaffIds()), absent=activeStaff().filter(st=>!used.has(st.id));
-  const FONT='"Noto Sans Thai","Th Sarabun New","Tahoma","Arial",sans-serif';
+  const FONT='"Thonburi","Sukhumvit Set","Tahoma","Arial Unicode MS",sans-serif';
   let teamHeights=[];
   for(let t of teams){
     let pc=(t.leader?1:0)+(t.members||[]).length;
@@ -351,12 +357,12 @@ async function exportElement(kind){
   }
   let totalH=300+teamHeights.reduce((a,b)=>a+b+18,0)+(absent.length?105:35);
   let canvas=document.createElement('canvas');canvas.width=1600;canvas.height=Math.max(1600,totalH);
-  let x=canvas.getContext('2d');
+  let x=canvas.getContext('2d');try{x.letterSpacing='0px';x.fontKerning='normal'}catch(e){}
   x.fillStyle='#f5f7fa';x.fillRect(0,0,1600,canvas.height);
   x.fillStyle='#0b3b68';x.fillRect(0,0,1600,150);
   x.fillStyle='#fff';x.font=`700 42px ${FONT}`;x.fillText(kind==='org'?'SFW&T แผนผังชุดทำงาน':'SFW&T แผนงานประจำวัน',55,62);
-  x.font=`400 24px ${FONT}`;x.fillText(`วันที่ ${state.plan.date||'-'}   ${state.plan.site?state.plan.site:''}`,55,104);
-  x.font=`400 20px ${FONT}`;drawWrapped(x,state.plan.overall||'',55,136,1480,25,2);
+  x.font=`400 24px ${FONT}`;x.fillText(`วันที่ ${state.plan.date||'-'}   ${state.plan.site?exportText(state.plan.site):''}`,55,104);
+  x.font=`400 20px ${FONT}`;drawWrapped(x,exportText(state.plan.overall||''),55,136,1480,25,2);
 
   let y=178;
   for(let i=0;i<teams.length;i++){
@@ -366,7 +372,7 @@ async function exportElement(kind){
 
     x.fillStyle='#eef3f8';x.beginPath();x.arc(78,top+44,28,0,Math.PI*2);x.fill();
     x.fillStyle='#0b3b68';x.font=`700 25px ${FONT}`;x.textAlign='center';x.fillText(t.id,78,top+52);x.textAlign='start';
-    x.fillStyle='#13233a';x.font=`700 27px ${FONT}`;x.fillText(t.name||('ชุดทำงาน '+t.id),120,top+52);
+    x.fillStyle='#13233a';x.font=`700 27px ${FONT}`;x.fillText(exportText(t.name||('ชุดทำงาน '+t.id)),120,top+52);
 
     let py=top+78, people=[];
     if(t.leader)people.push({id:t.leader,lead:true});
@@ -378,8 +384,8 @@ async function exportElement(kind){
       let im=await loadCanvasImage(await imageSrc('staff:'+st.id));
       if(im)drawRoundImage(x,im,bx,by,72,72,36);
       else{x.fillStyle='#e8eef5';x.beginPath();x.arc(bx+36,by+36,36,0,Math.PI*2);x.fill()}
-      x.fillStyle='#13233a';x.font=`700 18px ${FONT}`;drawWrapped(x,(p.lead?'หัวหน้า ':'')+(st.nick||st.name),bx+86,by+28,255,22,2);
-      x.fillStyle='#66758a';x.font=`400 15px ${FONT}`;drawWrapped(x,st.role||'',bx+86,by+58,255,19,1);
+      x.fillStyle='#13233a';x.font=`700 18px ${FONT}`;drawWrapped(x,exportText((p.lead?'หัวหน้า ':'')+(st.nick||st.name)),bx+86,by+28,255,22,2);
+      x.fillStyle='#66758a';x.font=`400 15px ${FONT}`;drawWrapped(x,exportText(st.role||''),bx+86,by+58,255,19,1);
       pi++;
     }
     py += Math.max(1,Math.ceil(people.length/4))*118;
@@ -393,8 +399,8 @@ async function exportElement(kind){
         x.fillStyle='#f8fafc';x.beginPath();x.roundRect(bx,by,470,112,14);x.fill();x.strokeStyle='#d5dde7';x.lineWidth=2;x.stroke();
         if(im)drawRoundImage(x,im,bx+8,by+8,120,96,10);
         else{x.fillStyle='#e8eef5';x.fillRect(bx+8,by+8,120,96)}
-        x.fillStyle='#13233a';x.font=`700 17px ${FONT}`;drawWrapped(x,m.name||'',bx+145,by+36,305,22,2);
-        x.fillStyle='#66758a';x.font=`400 14px ${FONT}`;x.fillText(m.code||m.type||'',bx+145,by+83);
+        x.fillStyle='#13233a';x.font=`700 17px ${FONT}`;drawWrapped(x,exportText(m.name||''),bx+145,by+36,305,22,2);
+        x.fillStyle='#66758a';x.font=`400 14px ${FONT}`;x.fillText(exportText(m.code||m.type||''),bx+145,by+83);
         mi++;
       }
       py+=Math.ceil(t.machines.length/3)*132;
@@ -402,14 +408,14 @@ async function exportElement(kind){
 
     x.fillStyle='#eef3f8';x.beginPath();x.roundRect(55,py,1490,70,12);x.fill();
     x.fillStyle='#13233a';x.font=`700 18px ${FONT}`;x.fillText('งาน',72,py+27);
-    x.font=`400 17px ${FONT}`;drawWrapped(x,t.plan||'-',125,py+27,1390,21,2);
+    x.font=`500 18px ${FONT}`;drawWrapped(x,exportText(t.plan||'-'),125,py+27,1390,23,2);
     y=top+boxH+18;
   }
 
   if(absent.length){
     x.fillStyle='#fff';x.beginPath();x.roundRect(35,y,1530,86,18);x.fill();x.strokeStyle='#d5dde7';x.stroke();
     x.fillStyle='#13233a';x.font=`700 20px ${FONT}`;x.fillText(`หยุดงาน / ขาดงาน ${absent.length} คน`,55,y+30);
-    x.font=`400 17px ${FONT}`;x.fillStyle='#66758a';drawWrapped(x,absent.map(st=>st.nick||st.name).join(' • '),55,y+58,1470,21,2);
+    x.font=`400 17px ${FONT}`;x.fillStyle='#66758a';drawWrapped(x,exportText(absent.map(st=>st.nick||st.name).join(' • ')),55,y+58,1470,21,2);
   }
   return await new Promise(r=>canvas.toBlob(r,'image/png',.95));
 }
@@ -417,7 +423,7 @@ function wrapText(ctx,text,x,y,max,w){let words=text.split(' '),line='';for(let 
 async function shareBlob(blob,name){let file=new File([blob],name,{type:'image/png'});if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){try{await navigator.share({files:[file],title:name});return}catch(e){if(e.name==='AbortError')return}}let a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 
 async function exportOrgChartImage(){
-  const teams=orderedTeams(),FONT='"Noto Sans Thai","Th Sarabun New","Tahoma","Arial",sans-serif';
+  const teams=orderedTeams(),FONT='"Thonburi","Sukhumvit Set","Tahoma","Arial Unicode MS",sans-serif';
   const cols=2,cardW=720,gapX=40,margin=60;
   let cardHeights=[];
   for(let t of teams){
@@ -427,19 +433,19 @@ async function exportOrgChartImage(){
   let rows=Math.ceil(teams.length/cols),rowHeights=[];
   for(let r=0;r<rows;r++)rowHeights.push(Math.max(...cardHeights.slice(r*cols,r*cols+cols),320));
   let H=360+rowHeights.reduce((a,b)=>a+b+45,0)+55;
-  let c=document.createElement('canvas');c.width=1600;c.height=Math.max(1600,H);let g=c.getContext('2d');
+  let c=document.createElement('canvas');c.width=1600;c.height=Math.max(1600,H);let g=c.getContext('2d');try{g.letterSpacing='0px';g.fontKerning='normal'}catch(e){}
   g.fillStyle='#f5f7fa';g.fillRect(0,0,c.width,c.height);
   g.fillStyle='#0b3b68';g.fillRect(0,0,1600,135);
   g.fillStyle='#fff';g.font=`700 40px ${FONT}`;g.fillText('SFW&T แผนผังชุดทำงาน',50,55);
-  g.font=`400 21px ${FONT}`;g.fillText(`วันที่ ${state.plan.date||'-'}   ${state.plan.site||''}`,50,94);
-  g.font=`400 18px ${FONT}`;drawWrapped(g,state.plan.overall||'',50,122,1490,22,1);
+  g.font=`400 21px ${FONT}`;g.fillText(`วันที่ ${state.plan.date||'-'}   ${exportText(state.plan.site||'')}`,50,94);
+  g.font=`400 18px ${FONT}`;drawWrapped(g,exportText(state.plan.overall||''),50,122,1490,22,1);
 
   let adminPic=await loadCanvasImage(await imageSrc('admin')),cx=800,top=165;
   g.fillStyle='#fff';g.beginPath();g.roundRect(cx-250,top,500,115,20);g.fill();g.strokeStyle='#0b3b68';g.lineWidth=3;g.stroke();
   if(adminPic)drawRoundImage(g,adminPic,cx-225,top+18,78,78,39);
   else{g.fillStyle='#e8eef5';g.beginPath();g.arc(cx-186,top+57,39,0,Math.PI*2);g.fill()}
-  g.fillStyle='#13233a';g.font=`700 23px ${FONT}`;g.fillText(state.admin.name||'ผู้บริหาร',cx-125,top+48);
-  g.fillStyle='#66758a';g.font=`400 17px ${FONT}`;g.fillText(state.admin.role||'',cx-125,top+76);
+  g.fillStyle='#13233a';g.font=`700 23px ${FONT}`;g.fillText(exportText(state.admin.name||'ผู้บริหาร'),cx-125,top+48);
+  g.fillStyle='#66758a';g.font=`400 17px ${FONT}`;g.fillText(exportText(state.admin.role||''),cx-125,top+76);
 
   let y=top+115;g.strokeStyle='#87a1bb';g.lineWidth=3;g.beginPath();g.moveTo(cx,y);g.lineTo(cx,y+35);g.stroke();y+=35;
   let idx=0;
@@ -454,7 +460,7 @@ async function exportOrgChartImage(){
       g.fillStyle='#fff';g.beginPath();g.roundRect(x0,by,cardW,h,20);g.fill();g.strokeStyle='#0b3b68';g.lineWidth=3;g.stroke();
       g.fillStyle='#eef3f8';g.beginPath();g.arc(x0+42,by+39,25,0,Math.PI*2);g.fill();
       g.fillStyle='#0b3b68';g.font=`700 22px ${FONT}`;g.textAlign='center';g.fillText(t.id,x0+42,by+47);g.textAlign='start';
-      g.fillStyle='#13233a';g.font=`700 23px ${FONT}`;g.fillText(t.name||('ชุดทำงาน '+t.id),x0+82,by+47);
+      g.fillStyle='#13233a';g.font=`700 23px ${FONT}`;g.fillText(exportText(t.name||('ชุดทำงาน '+t.id)),x0+82,by+47);
 
       let py=by+73,people=[];if(t.leader)people.push({id:t.leader,lead:true});(t.members||[]).forEach(id=>people.push({id,lead:false}));
       let pi=0;
@@ -463,7 +469,7 @@ async function exportOrgChartImage(){
         let px=x0+22+(pi%3)*225,yy=py+Math.floor(pi/3)*118,im=await loadCanvasImage(await imageSrc('staff:'+st.id));
         if(im)drawRoundImage(g,im,px,yy,68,68,34);
         else{g.fillStyle='#e8eef5';g.beginPath();g.arc(px+34,yy+34,34,0,Math.PI*2);g.fill()}
-        g.fillStyle='#13233a';g.font=`700 16px ${FONT}`;drawWrapped(g,(p.lead?'หัวหน้า ':'')+(st.nick||st.name),px,yy+91,190,19,2);pi++;
+        g.fillStyle='#13233a';g.font=`700 16px ${FONT}`;drawWrapped(g,exportText((p.lead?'หัวหน้า ':'')+(st.nick||st.name)),px,yy+91,190,19,2);pi++;
       }
       py+=Math.max(1,Math.ceil(people.length/3))*118;
 
@@ -474,13 +480,13 @@ async function exportOrgChartImage(){
         g.fillStyle='#f8fafc';g.beginPath();g.roundRect(mx,my,310,108,12);g.fill();g.strokeStyle='#d5dde7';g.lineWidth=2;g.stroke();
         if(im)drawRoundImage(g,im,mx+7,my+7,110,94,9);
         else{g.fillStyle='#e8eef5';g.fillRect(mx+7,my+7,110,94)}
-        g.fillStyle='#13233a';g.font=`700 15px ${FONT}`;drawWrapped(g,m.name||'',mx+130,my+37,165,18,3);mi++;
+        g.fillStyle='#13233a';g.font=`700 15px ${FONT}`;drawWrapped(g,exportText(m.name||''),mx+130,my+37,165,18,3);mi++;
       }
       if((t.machines||[]).length)py+=Math.ceil(t.machines.length/2)*125;
 
       g.fillStyle='#eef3f8';g.beginPath();g.roundRect(x0+22,py,cardW-44,58,10);g.fill();
       g.fillStyle='#13233a';g.font=`700 16px ${FONT}`;g.fillText('งาน',x0+36,py+24);
-      g.font=`400 15px ${FONT}`;drawWrapped(g,t.plan||'-',x0+82,py+24,cardW-120,18,2);
+      g.font=`500 16px ${FONT}`;drawWrapped(g,exportText(t.plan||'-'),x0+82,py+24,cardW-120,20,2);
       idx++;
     }
     if(centers.length){
