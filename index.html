@@ -12,23 +12,30 @@ label{font-size:12px;color:var(--muted);font-weight:700;display:block;margin:7px
 .modal{position:fixed;inset:0;background:#0008;z-index:50;display:none;align-items:flex-end}.modal.show{display:flex}.sheet{width:100%;background:#fff;border-radius:20px 20px 0 0;max-height:90vh;overflow:auto;padding:14px max(16px,env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}.sheetHead{position:sticky;top:-14px;background:#fff;z-index:2;padding:8px 0;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}.sheetHead h3{margin:0}.closeBtn{border:0;background:#eef3f8;color:var(--navy);border-radius:10px;padding:9px 12px;font-weight:900}.photoGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.photoTile{position:relative}.photoTile img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;border:1px solid var(--line)}.photoTile button{position:absolute;right:4px;top:4px;border:0;border-radius:8px;background:#0009;color:#fff}.langMM{font-size:11px;color:#728298;display:block;margin-top:1px}
 @media(max-width:760px){.cards{grid-template-columns:repeat(2,1fr)}.grid2,.grid3{grid-template-columns:1fr}.teamGrid{grid-template-columns:1fr}.brand h1{font-size:17px}.brand small{font-size:11px}.pageTitle h2{font-size:20px}.bottomNav{height:72px}.org{min-width:900px}}
 @media print{header,.bottomNav,.noPrint{display:none!important}main{padding:0}.page{display:none!important}.page#printPage{display:block!important}}
-</style><meta name="sfwt-version" content="v43-rich-image-export"></head><body>
+</style><meta name="sfwt-version" content="v44-simple-workflow-org-export"></head><body>
 <header><div class="brand"><img src="sft-logo.jpg"><div><h1>SFW&T บริหารทีมงาน</h1><small>บริษัท ศักวิเศษ เฟรม แอนด์ ทรัส จำกัด</small></div><div class="topActions"><button class="iconBtn" onclick="toggleLang()" id="langBtn">TH / မြန်မာ</button></div></div></header>
 <main>
-<section class="page active" id="dashboardPage"><div class="pageTitle"><h2>ภาพรวม <span class="langMM">အကျဉ်းချုပ်</span></h2><button class="btn navy" onclick="exportPlan()">📤 ส่งแผน</button></div><div class="cards" id="stats"></div><div class="panel"><h3>แผนงานวันนี้ <span class="langMM">ယနေ့အလုပ်အစီအစဉ်</span></h3><div id="todaySummary"></div></div><div class="panel"><h3>ชุดทำงานทั้งหมด</h3><div id="dashboardTeams" class="teamGrid"></div></div></section>
-<section class="page" id="planPage"><div class="pageTitle"><h2>แผนงาน <span class="langMM">အလုပ်အစီအစဉ်</span></h2><button class="btn red" onclick="savePlan()">บันทึกแผน</button></div><div class="panel"><div class="grid2"><div><label>วันที่</label><input type="date" id="planDate"></div><div><label>ไซต์งาน / พื้นที่</label><input id="planSite" placeholder="เช่น ชั้น 1 / โซนติดตั้ง / พื้นที่งาน"></div></div><label>รายละเอียดแผนงานรวม</label><textarea id="planOverall" placeholder="กรอกรายละเอียดงาน เป้าหมาย ลำดับงาน จุดตรวจ และหมายเหตุ"></textarea><label>ภาษาพม่า (แปลอัตโนมัติ) / မြန်မာ</label><textarea id="planOverallMM" readonly placeholder="ระบบจะแปลจากภาษาไทยอัตโนมัติ"></textarea></div><div id="teamPlanEditors"></div>
-<div class="panel">
-  <div class="pageTitle" style="margin:0 0 10px">
-    <h3 style="margin:0">ประวัติแผนงานย้อนหลัง</h3>
-  </div>
-  <div id="historyList"></div>
-</div></section>
+<section class="page active" id="dashboardPage"><div class="pageTitle"><h2>ภาพรวม <span class="langMM">အကျဉ်းချုပ်</span></h2><button class="btn navy" onclick="exportPlan()">🖼️ ส่งออกรูป</button></div><div class="cards" id="stats"></div><div class="panel"><h3>งานวันนี้ <span class="langMM">ယနေ့အလုပ်အစီအစဉ်</span></h3><div id="todaySummary"></div></div><div class="panel"><h3>ชุดทำงานทั้งหมด</h3><div id="dashboardTeams" class="teamGrid"></div></div></section>
 <section class="page" id="staffPage"><div class="pageTitle"><h2>พนักงาน <span class="langMM">ဝန်ထမ်း</span></h2><button class="btn red" onclick="openStaffEditor()">＋ เพิ่มพนักงาน</button></div><div class="panel"><input id="staffSearch" placeholder="ค้นหาชื่อ / ตำแหน่ง" oninput="renderStaff()"></div><div id="staffList" class="list"></div></section>
 <section class="page" id="machinePage"><div class="pageTitle"><h2>เครื่องจักร <span class="langMM">စက်ယန္တရား</span></h2><button class="btn red" onclick="openMachineEditor()">＋ เพิ่มเครื่องจักร</button></div><div id="machineList" class="list"></div></section>
-<section class="page" id="teamsPage"><div class="pageTitle"><h2>จัดทีม <span class="langMM">အဖွဲ့စီမံခြင်း</span></h2><button class="btn navy" onclick="exportPlan()">📤 ส่งออกภาพ</button></div><div class="panel muted">เลือกหัวหน้า เพิ่ม/ย้ายพนักงาน และเลือกเครื่องจักรได้หลายคันต่อทีม รูปจะดึงจากหน้าพนักงานและเครื่องจักรอัตโนมัติ</div><div id="teamEditorGrid" class="teamGrid"></div></section>
-<section class="page" id="orgPage"><div class="pageTitle"><h2>แผนผังทีมงาน <span class="langMM">အဖွဲ့အစည်းပုံစံ</span></h2><button class="btn navy" onclick="exportOrg()">📤 ส่งออกแผนผัง</button></div><div class="panel"><div class="grid2"><div><label>ชื่อผู้บริหาร</label><input id="adminName" onchange="saveAdmin()"></div><div><label>ตำแหน่ง</label><input id="adminRole" onchange="saveAdmin()"></div></div><button class="btn outline" onclick="pickAdminPhoto()">📷 รูปผู้บริหาร</button></div><div class="panel orgWrap"><div id="orgChart" class="org"></div></div></section>
+<section class="page" id="teamsPage">
+<div class="pageTitle"><h2>จัดชุดทำงาน <span class="langMM">အဖွဲ့စီမံခြင်း</span></h2><button class="btn navy" onclick="exportPlan()">🖼️ ส่งออกรูป</button></div>
+<div class="panel">
+  <div class="grid2"><div><label>วันที่ทำงาน</label><input type="date" id="planDate"></div><div><label>สถานที่ / ไซต์งาน</label><input id="planSite" placeholder="ระบุสถานที่ทำงาน"></div></div>
+  <label>รายละเอียดงานรวม</label><textarea id="planOverall" placeholder="รายละเอียดงานวันนี้" oninput="autoTranslate('planOverall','planOverallMM')"></textarea>
+  <textarea id="planOverallMM" readonly style="display:none"></textarea>
+  <button class="btn red full" onclick="savePlan()">💾 บันทึกงานวันนี้</button>
+</div>
+<div class="panel" style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+  <div><b>ชุดทำงาน</b><div class="muted">A • B • C • D • E และเพิ่มต่อได้ตลอด</div></div>
+  <button class="btn navy" onclick="addWorkTeam()">＋ เพิ่มชุดทำงาน</button>
+</div>
+<div id="teamEditorGrid" class="teamGrid"></div>
+<div class="panel"><h3 style="margin-top:0">ประวัติการจัดชุดทำงานย้อนหลัง</h3><div id="historyList"></div></div>
+</section>
+<section class="page" id="orgPage"><div class="pageTitle"><h2>แผนผังทีมงาน <span class="langMM">အဖွဲ့အစည်းပုံစံ</span></h2><button class="btn navy" onclick="exportOrg()">🖼️ ส่งออกรูปแผนผัง</button></div><div class="panel"><div class="grid2"><div><label>ชื่อผู้บริหาร</label><input id="adminName" onchange="saveAdmin()"></div><div><label>ตำแหน่ง</label><input id="adminRole" onchange="saveAdmin()"></div></div><button class="btn outline" onclick="pickAdminPhoto()">📷 รูปผู้บริหาร</button></div><div class="panel orgWrap"><div id="orgChart" class="org"></div></div></section>
 </main>
-<nav class="bottomNav"><button class="navBtn active" data-page="dashboardPage" onclick="showPage(this)"><b>▦</b>ภาพรวม</button><button class="navBtn" data-page="planPage" onclick="showPage(this)"><b>📝</b>แผนงาน</button><button class="navBtn" data-page="staffPage" onclick="showPage(this)"><b>👷</b>พนักงาน</button><button class="navBtn" data-page="machinePage" onclick="showPage(this)"><b>🏗️</b>เครื่องจักร</button><button class="navBtn" data-page="teamsPage" onclick="showPage(this)"><b>👥</b>จัดทีม</button><button class="navBtn" data-page="orgPage" onclick="showPage(this)"><b>⌘</b>แผนผัง</button></nav>
+<nav class="bottomNav"><button class="navBtn active" data-page="dashboardPage" onclick="showPage(this)"><b>▦</b>ภาพรวม</button><button class="navBtn" data-page="staffPage" onclick="showPage(this)"><b>👷</b>พนักงาน</button><button class="navBtn" data-page="machinePage" onclick="showPage(this)"><b>🏗️</b>เครื่องจักร</button><button class="navBtn" data-page="teamsPage" onclick="showPage(this)"><b>👥</b>จัดทีม</button><button class="navBtn" data-page="orgPage" onclick="showPage(this)"><b>⌘</b>แผนผัง</button></nav>
 <input type="file" id="photoInput" accept="image/*" multiple hidden>
 <div class="modal" id="editModal"><div class="sheet"><div class="sheetHead"><h3 id="modalTitle">แก้ไข</h3><button class="closeBtn" onclick="closeModal()">← ย้อนกลับ / ปิด</button></div><div id="modalBody"></div></div></div>
 <script>
@@ -188,10 +195,10 @@ function teamOrder(a,b){return String(a.id).localeCompare(String(b.id),undefined
 function orderedTeams(){return [...state.teams].sort(teamOrder)}
 function nextTeamId(){return workLabel(state.teams.length)}
 function addWorkTeam(){let id=nextTeamId();openModal('เพิ่มชุดทำงาน '+id,`<label>ชื่อชุดทำงาน</label><input id=newTeamName value="ชุดทำงาน ${id}"><label>รายละเอียดงาน (ภาษาไทย)</label><textarea id=newTeamPlan oninput="autoTranslate('newTeamPlan','newTeamPlanMM')"></textarea><label>ภาษาพม่า (แปลอัตโนมัติ)</label><textarea id=newTeamPlanMM readonly></textarea><button class="btn navy full" onclick="saveNewWorkTeam()">＋ เพิ่มชุดทำงาน ${id}</button>`)}
-async function saveNewWorkTeam(){let id=nextTeamId(),name=document.getElementById('newTeamName').value.trim()||('ชุดทำงาน '+id),plan=document.getElementById('newTeamPlan').value.trim();state.teams.push({id,zone:'',name,leader:'',members:[],machines:[],plan,planMM:await translateTH(plan)});closeModal();save()}
+async function saveNewWorkTeam(){let id=nextTeamId(),name=document.getElementById('newTeamName').value.trim()||('ชุดทำงาน '+id),plan=document.getElementById('newTeamPlan').value.trim();state.teams.push({id,zone:'',name,leader:'',members:[],machines:[],plan,planMM:await translateTH(plan)});saveHistorySnapshot();closeModal();save()}
 function deleteWorkTeam(id){
   if(!confirm('ลบชุดทำงาน '+id+' ?'))return;
-  state.teams=state.teams.filter(t=>t.id!==id);save();
+  state.teams=state.teams.filter(t=>t.id!==id);saveHistorySnapshot();save();
 }
 async function imageSrc(key){let v=await imgGet(key);if(v)return v;if(key.startsWith('staff:')){let id=key.split(':')[1];return id+'.jpg'}return ''}
 function showPage(btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.navBtn').forEach(x=>x.classList.remove('active'));document.getElementById(btn.dataset.page).classList.add('active');btn.classList.add('active');scrollTo(0,0);if(btn.dataset.page==='orgPage')renderOrg()}
@@ -239,7 +246,7 @@ async function saveTeamEditor(id){
   machines=[...document.querySelectorAll('input[name=mach]:checked')].map(x=>x.value);
   let err=validateUniqueTeam(id,leader,members,machines);if(err)return alert('เลือกซ้ำไม่ได้: '+err);
   t.name=document.getElementById('tName').value.trim();t.zone='';t.leader=leader;t.members=members;t.machines=machines;
-  t.plan=document.getElementById('tPlan').value;t.planMM=await translateTH(t.plan);closeModal();save()
+  t.plan=document.getElementById('tPlan').value;t.planMM=await translateTH(t.plan);saveHistorySnapshot();closeModal();save()
 }
 async function teamCard(t,edit=false){let lead=staffBy(t.leader),lp=lead?await imageSrc('staff:'+lead.id):'',people=[];for(let id of t.members){let s=staffBy(id);if(!s)continue;let p=await imageSrc('staff:'+id);people.push(`<div class=chip>${p?`<img src="${p}">`:`<span>👷</span>`}${esc(s.nick||s.name)}</div>`)}let ms=[];for(let id of t.machines){let m=machBy(id);if(!m)continue;let pics=(await imgGet('machine:'+id))||[];ms.push(`<div class=machMini>${pics[0]?`<img src="${pics[0]}">`:`<div class="thumb placeholder">🏗️</div>`}<div class=grow><b>${esc(m.name)}</b><span class=langMM>${esc(m.nameMM||'')}</span></div></div>`)}return `<div class="teamCard"><div class=teamHead><div><span class="tag">${esc(t.id)}</span><h3 style="margin:5px 0">${esc(t.name)}</h3><div class=muted>${lead?`หัวหน้า: ${esc(lead.nick||lead.name)} / ${esc(lead.name)}`:'ยังไม่เลือกหัวหน้า'}</div></div>${edit?`<button class=btn onclick="openTeamEditor('${t.id}')">✏️ ปรับทีม</button>`:''}</div>${lead?`<div class=personCard style="margin-top:8px">${lp?`<img class=avatar src="${lp}">`:`<div class="avatar placeholder">${esc((lead.nick||lead.name).slice(0,2))}</div>`}<div class=grow><b>${esc(lead.nick||'')} ${esc(lead.name)}</b><small>${esc(lead.role)}</small><span class=langMM>${esc(lead.roleMM||'')}</span></div></div>`:''}<div class=teamPeople>${people.join('')||'<span class=muted>ยังไม่มีลูกทีม</span>'}</div><div class=machList>${ms.join('')||'<span class=muted>ยังไม่มีเครื่องจักร</span>'}</div><div class=planBox><b>งาน:</b> ${esc(t.plan||'-')}<span class=langMM>${esc(t.planMM||'')}</span></div></div>`}
 async function renderTeams(){
@@ -249,23 +256,21 @@ async function renderTeams(){
   document.getElementById('dashboardTeams').innerHTML=d.join('');
 }
 function loadPlanForm(){
-  document.getElementById('planDate').value=state.plan.date||'';
-  document.getElementById('planSite').value=state.plan.site||'';
-  document.getElementById('planOverall').value=state.plan.overall||'';
-  document.getElementById('planOverall').setAttribute('oninput',"autoTranslate('planOverall','planOverallMM')");
-  document.getElementById('planOverallMM').value=state.plan.overallMM||'';
-  document.getElementById('teamPlanEditors').innerHTML=orderedTeams().map(t=>`<div class=panel><h3>${esc(t.id+' • '+t.name)}</h3>
-  <label>รายละเอียดงาน (แก้ไขภาษาไทย)</label><textarea id="plan_${t.id}" oninput="autoTranslate('plan_${t.id}','planmm_${t.id}')">${esc(t.plan||'')}</textarea>
-  <label>ภาษาพม่า (แปลอัตโนมัติ) / မြန်မာ</label><textarea readonly id="planmm_${t.id}">${esc(t.planMM||'')}</textarea></div>`).join('')
+  let d=document.getElementById('planDate'),site=document.getElementById('planSite'),ov=document.getElementById('planOverall'),mm=document.getElementById('planOverallMM');
+  if(d)d.value=state.plan.date||'';
+  if(site)site.value=state.plan.site||'';
+  if(ov)ov.value=state.plan.overall||'';
+  if(mm)mm.value=state.plan.overallMM||'';
+  let ed=document.getElementById('teamPlanEditors');
+  if(ed)ed.innerHTML='';
 }
 async function savePlan(){
-  state.plan.date=document.getElementById('planDate').value;
-  state.plan.site=document.getElementById('planSite').value;
-  state.plan.overall=document.getElementById('planOverall').value;
-  state.plan.overallMM=await translateTH(state.plan.overall);
-  for(let t of orderedTeams()){t.plan=document.getElementById('plan_'+t.id).value;t.planMM=await translateTH(t.plan)}
-  saveHistorySnapshot();
-  save();alert('บันทึกแผนงานและเก็บประวัติแล้ว • คนที่ไม่ได้อยู่ในชุดทำงานถูกนับเป็นหยุดงาน');
+  let d=document.getElementById('planDate'),site=document.getElementById('planSite'),ov=document.getElementById('planOverall');
+  if(d)state.plan.date=d.value||state.plan.date;
+  if(site)state.plan.site=site.value;
+  if(ov){state.plan.overall=ov.value;state.plan.overallMM=await translateTH(state.plan.overall)}
+  saveHistorySnapshot();save();
+  alert('บันทึกข้อมูลล่าสุดและเก็บประวัติแล้ว');
 }
 function saveAdmin(){state.admin.name=document.getElementById('adminName').value;state.admin.role=document.getElementById('adminRole').value;save()}
 async function orgImg(key,fallback){let p=await imageSrc(key);return p||fallback}
@@ -395,7 +400,110 @@ async function exportElement(kind){
 }
 function wrapText(ctx,text,x,y,max,w){let words=text.split(' '),line='';for(let word of words){let test=line+word+' ';if(ctx.measureText(test).width>max&&line){ctx.fillText(line,x,y);line=word+' ';y+=w}else line=test}ctx.fillText(line,x,y)}
 async function shareBlob(blob,name){let file=new File([blob],name,{type:'image/png'});if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){try{await navigator.share({files:[file],title:name});return}catch(e){if(e.name==='AbortError')return}}let a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
-async function exportPlan(){await shareBlob(await exportElement('plan'),`SFW&T-plan-${state.plan.date||'latest'}.png`)}async function exportOrg(){await shareBlob(await exportElement('org'),`SFW&T-orgchart-${state.plan.date||'latest'}.png`)}
+
+async function exportOrgChartImage(){
+  const teams=orderedTeams();
+  const cols=2, cardW=720, gapX=40, margin=60;
+  let cardHeights=[];
+  for(let t of teams){
+    let pc=(t.leader?1:0)+(t.members||[]).length, mc=(t.machines||[]).length;
+    cardHeights.push(250+Math.ceil(pc/3)*145+Math.ceil(Math.max(1,mc)/2)*175);
+  }
+  let rows=Math.ceil(teams.length/cols), rowHeights=[];
+  for(let r=0;r<rows;r++)rowHeights.push(Math.max(...cardHeights.slice(r*cols,r*cols+cols),400));
+  let H=420+rowHeights.reduce((a,b)=>a+b+70,0)+100;
+  let c=document.createElement('canvas');c.width=1600;c.height=Math.max(2200,H);let g=c.getContext('2d');
+  g.fillStyle='#f5f7fa';g.fillRect(0,0,c.width,c.height);
+  g.fillStyle='#0b3b68';g.fillRect(0,0,1600,170);
+  g.fillStyle='#fff';g.font='bold 46px sans-serif';g.fillText('SFW&T แผนผังชุดทำงาน',60,68);
+  g.font='24px sans-serif';g.fillText(`วันที่ ${state.plan.date||'-'}   ${state.plan.site||''}`,60,112);
+  g.font='21px sans-serif';g.fillText(state.plan.overall||'',60,148);
+
+  // CEO / administrator node
+  let adminPic=await loadCanvasImage(await imageSrc('admin'));
+  let cx=800, top=220;
+  g.fillStyle='#fff';g.beginPath();g.roundRect(cx-310,top,620,150,24);g.fill();g.strokeStyle='#0b3b68';g.lineWidth=4;g.stroke();
+  if(adminPic)drawRoundImage(g,adminPic,cx-280,top+25,100,100,50);
+  else{g.fillStyle='#e8eef5';g.beginPath();g.arc(cx-230,top+75,50,0,Math.PI*2);g.fill();g.fillStyle='#0b3b68';g.font='bold 26px sans-serif';g.fillText('CEO',cx-256,top+84)}
+  g.fillStyle='#13233a';g.font='bold 28px sans-serif';g.fillText(state.admin.name||'ผู้บริหาร',cx-155,top+63);
+  g.font='21px sans-serif';g.fillStyle='#66758a';g.fillText(state.admin.role||'',cx-155,top+98);
+
+  // trunk
+  let y=top+150;
+  g.strokeStyle='#87a1bb';g.lineWidth=4;g.beginPath();g.moveTo(cx,y);g.lineTo(cx,y+55);g.stroke();
+  y+=55;
+
+  let idx=0;
+  for(let r=0;r<rows;r++){
+    let rh=rowHeights[r];
+    let rowTop=y;
+    let leftCenters=[];
+    for(let col=0;col<cols;col++){
+      if(idx>=teams.length)break;
+      let t=teams[idx], h=cardHeights[idx], x0=margin+col*(cardW+gapX);
+      let cardCx=x0+cardW/2;leftCenters.push(cardCx);
+
+      // connector from row line
+      g.strokeStyle='#87a1bb';g.lineWidth=4;g.beginPath();g.moveTo(cardCx,rowTop);g.lineTo(cardCx,rowTop+42);g.stroke();
+
+      let by=rowTop+42;
+      g.fillStyle='#fff';g.beginPath();g.roundRect(x0,by,cardW,h,24);g.fill();g.strokeStyle='#0b3b68';g.lineWidth=4;g.stroke();
+
+      // team letter bubble
+      g.fillStyle='#eef3f8';g.beginPath();g.arc(x0+54,by+54,34,0,Math.PI*2);g.fill();
+      g.fillStyle='#0b3b68';g.font='bold 30px sans-serif';g.textAlign='center';g.fillText(t.id,x0+54,by+64);g.textAlign='start';
+      g.fillStyle='#13233a';g.font='bold 27px sans-serif';g.fillText(t.name||('ชุดทำงาน '+t.id),x0+105,by+62);
+
+      let py=by+95, people=[];
+      if(t.leader)people.push({id:t.leader,lead:true});
+      (t.members||[]).forEach(id=>people.push({id,lead:false}));
+      let pi=0;
+      for(let p of people){
+        let st=staffBy(p.id);if(!st)continue;
+        let px=x0+28+(pi%3)*225, yy=py+Math.floor(pi/3)*145;
+        let im=await loadCanvasImage(await imageSrc('staff:'+st.id));
+        if(im)drawRoundImage(g,im,px,yy,86,86,43);
+        else{g.fillStyle='#e8eef5';g.beginPath();g.arc(px+43,yy+43,43,0,Math.PI*2);g.fill()}
+        g.fillStyle='#13233a';g.font='bold 19px sans-serif';drawWrapped(g,(p.lead?'หัวหน้า ':'')+(st.nick||st.name),px,yy+112,190,23,2);
+        pi++;
+      }
+      py+=Math.ceil(Math.max(1,people.length)/3)*145;
+
+      // machines as big visual tiles
+      let mi=0;
+      for(let mid of (t.machines||[])){
+        let m=machBy(mid);if(!m)continue;
+        let pics=(await imgGet('machine:'+mid))||[], im=await loadCanvasImage(pics[0]||'');
+        let mx=x0+28+(mi%2)*335, my=py+Math.floor(mi/2)*175;
+        g.fillStyle='#f8fafc';g.beginPath();g.roundRect(mx,my,310,150,16);g.fill();g.strokeStyle='#d5dde7';g.lineWidth=2;g.stroke();
+        if(im)drawRoundImage(g,im,mx+10,my+10,145,130,12);
+        else{g.fillStyle='#e8eef5';g.fillRect(mx+10,my+10,145,130)}
+        g.fillStyle='#13233a';g.font='bold 18px sans-serif';drawWrapped(g,m.name||'',mx+170,my+55,125,23,3);
+        mi++;
+      }
+      py+=Math.ceil(Math.max(1,(t.machines||[]).length)/2)*175;
+
+      g.fillStyle='#eef3f8';g.beginPath();g.roundRect(x0+28,py,cardW-56,92,14);g.fill();
+      g.fillStyle='#13233a';g.font='bold 19px sans-serif';g.fillText('งาน',x0+45,py+29);
+      g.font='18px sans-serif';drawWrapped(g,t.plan||'-',x0+100,py+29,cardW-145,24,2);
+
+      idx++;
+    }
+    // horizontal branch for this row
+    if(leftCenters.length){
+      g.strokeStyle='#87a1bb';g.lineWidth=4;g.beginPath();
+      g.moveTo(leftCenters[0],rowTop);
+      g.lineTo(leftCenters[leftCenters.length-1],rowTop);
+      g.stroke();
+      g.beginPath();g.moveTo(cx,rowTop-30);g.lineTo(cx,rowTop);g.stroke();
+    }
+    y=rowTop+rh+70;
+    if(r<rows-1){g.beginPath();g.moveTo(cx,y-70);g.lineTo(cx,y);g.stroke()}
+  }
+  return await new Promise(r=>c.toBlob(r,'image/png',.95));
+}
+async function exportPlan(){await shareBlob(await exportElement('plan'),`SFW&T-work-${state.plan.date||'latest'}.png`)}
+async function exportOrg(){await shareBlob(await exportOrgChartImage(),`SFW&T-orgchart-${state.plan.date||'latest'}.png`)}
 async function renderAll(){await renderStats();await renderStaff();await renderMachines();await renderTeams();loadPlanForm();renderHistory();await renderOrg();document.body.classList.toggle('hideMM',state.lang==='th')}
 window.addEventListener('pagehide',()=>{try{localStorage.setItem(STATE_KEY,JSON.stringify(state))}catch(e){}});renderAll();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script><style>.hideMM .langMM{display:none!important}textarea[readonly],input[readonly]{background:#eef2f7;color:#526173} .zoneTitle{margin:12px 0 8px;padding:10px 14px;border-radius:12px;background:#eef2f7;color:#0b3b68;font-size:18px}.zoneTitle b{font-size:20px} .attendanceWork{font-weight:800}.attendanceOff{font-weight:800}.historyDate{font-variant-numeric:tabular-nums}
