@@ -12,7 +12,7 @@ label{font-size:12px;color:var(--muted);font-weight:700;display:block;margin:7px
 .modal{position:fixed;inset:0;background:#0008;z-index:50;display:none;align-items:flex-end}.modal.show{display:flex}.sheet{width:100%;background:#fff;border-radius:20px 20px 0 0;max-height:90vh;overflow:auto;padding:14px max(16px,env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}.sheetHead{position:sticky;top:-14px;background:#fff;z-index:2;padding:8px 0;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}.sheetHead h3{margin:0}.closeBtn{border:0;background:#eef3f8;color:var(--navy);border-radius:10px;padding:9px 12px;font-weight:900}.photoGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.photoTile{position:relative}.photoTile img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;border:1px solid var(--line)}.photoTile button{position:absolute;right:4px;top:4px;border:0;border-radius:8px;background:#0009;color:#fff}.langMM{font-size:11px;color:#728298;display:block;margin-top:1px}
 @media(max-width:760px){.cards{grid-template-columns:repeat(2,1fr)}.grid2,.grid3{grid-template-columns:1fr}.teamGrid{grid-template-columns:1fr}.brand h1{font-size:17px}.brand small{font-size:11px}.pageTitle h2{font-size:20px}.bottomNav{height:72px}.org{min-width:900px}}
 @media print{header,.bottomNav,.noPrint{display:none!important}main{padding:0}.page{display:none!important}.page#printPage{display:block!important}}
-</style><meta name="sfwt-version" content="v44-simple-workflow-org-export"></head><body>
+</style><meta name="sfwt-version" content="v45-compact-visual-export-fontfix"></head><body>
 <header><div class="brand"><img src="sft-logo.jpg"><div><h1>SFW&T บริหารทีมงาน</h1><small>บริษัท ศักวิเศษ เฟรม แอนด์ ทรัส จำกัด</small></div><div class="topActions"><button class="iconBtn" onclick="toggleLang()" id="langBtn">TH / မြန်မာ</button></div></div></header>
 <main>
 <section class="page active" id="dashboardPage"><div class="pageTitle"><h2>ภาพรวม <span class="langMM">အကျဉ်းချုပ်</span></h2><button class="btn navy" onclick="exportPlan()">🖼️ ส่งออกรูป</button></div><div class="cards" id="stats"></div><div class="panel"><h3>งานวันนี้ <span class="langMM">ယနေ့အလုပ်အစီအစဉ်</span></h3><div id="todaySummary"></div></div><div class="panel"><h3>ชุดทำงานทั้งหมด</h3><div id="dashboardTeams" class="teamGrid"></div></div></section>
@@ -168,18 +168,30 @@ function restoreHistory(date){
   state.teams=deepCopy(h.teams||[]);
   save();alert('นำแผนวันที่ '+date+' กลับมาแล้ว แก้ไขต่อได้ทันที');
 }
-function viewHistory(date){
+async function viewHistory(date){
   let h=historyByDate(date);if(!h)return;
   let absent=(h.absentIds||[]).map(id=>staffBy(id)).filter(Boolean);
-  let cards=(h.teams||[]).map(t=>{
-    let lead=staffBy(t.leader);
-    let members=(t.members||[]).map(id=>staffBy(id)?.nick||staffBy(id)?.name).filter(Boolean).join(' • ');
-    let machines=(t.machines||[]).map(id=>machBy(id)?.name).filter(Boolean).join(' • ');
-    return `<div class=panel style="margin:8px 0"><b>ชุด ${esc(t.id)} • ${esc(t.name||'')}</b><div>หัวหน้า: ${lead?esc(lead.nick||lead.name):'-'}</div><div>ลูกทีม: ${esc(members||'-')}</div><div>เครื่องจักร: ${esc(machines||'-')}</div><div>งาน: ${esc(t.plan||'-')}</div></div>`;
-  }).join('');
+  let cards=[];
+  for(let t of (h.teams||[])){
+    let lead=staffBy(t.leader), people=[];
+    if(lead)people.push(lead);
+    for(let id of (t.members||[])){let st=staffBy(id);if(st)people.push(st)}
+    let peopleHtml='';
+    for(let st of people){
+      let pic=await imageSrc('staff:'+st.id);
+      peopleHtml+=`<div style="display:flex;align-items:center;gap:8px">${pic?`<img src="${pic}" style="width:48px;height:48px;border-radius:50%;object-fit:cover">`:`<div class="avatar placeholder" style="width:48px;height:48px">${esc((st.nick||st.name).slice(0,1))}</div>`}<div><b>${esc(st.nick||st.name)}</b><small style="display:block">${esc(st.role||'')}</small></div></div>`;
+    }
+    let machHtml='';
+    for(let id of (t.machines||[])){
+      let m=machBy(id);if(!m)continue;
+      let pics=(await imgGet('machine:'+id))||[];
+      machHtml+=`<div style="display:flex;align-items:center;gap:8px">${pics[0]?`<img src="${pics[0]}" style="width:70px;height:52px;border-radius:8px;object-fit:cover">`:`<div class="avatar placeholder" style="width:70px;height:52px;border-radius:8px">⚙️</div>`}<div><b>${esc(m.name)}</b><small style="display:block">${esc(m.code||m.type||'')}</small></div></div>`;
+    }
+    cards.push(`<div class=panel style="margin:8px 0"><b>ชุด ${esc(t.id)} • ${esc(t.name||'')}</b><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px">${peopleHtml}</div><div style="display:grid;gap:8px;margin-top:8px">${machHtml}</div><div style="margin-top:8px"><b>งาน:</b> ${esc(t.plan||'-')}</div></div>`);
+  }
   openModal('ประวัติ '+date,`<div><b>${esc(h.site||'ยังไม่ระบุไซต์')}</b><div class=muted>${esc(h.overall||'')}</div></div>
-    <div class=panel style="margin-top:10px"><b>หยุดงาน ${absent.length} คน</b><div>${absent.length?absent.map(s=>esc(s.nick||s.name)).join(' • '):'ไม่มี'}</div></div>
-    ${cards}
+    <div class=panel style="margin-top:10px"><b>หยุดงาน ${absent.length} คน</b><div>${absent.length?absent.map(st=>esc(st.nick||st.name)).join(' • '):'ไม่มี'}</div></div>
+    ${cards.join('')}
     <button class="btn navy full" onclick="closeModal();restoreHistory('${date}')">ใช้แผนนี้อีกครั้ง</button>`);
 }
 function renderHistory(){
@@ -326,75 +338,78 @@ function drawWrapped(ctx,text,x,y,maxWidth,lineHeight,maxLines=3){
   return lines.length*lineHeight;
 }
 async function exportElement(kind){
-  const teams=orderedTeams(), absent=activeStaff().filter(st=>!new Set(assignedStaffIds()).has(st.id));
+  const teams=orderedTeams(), used=new Set(assignedStaffIds()), absent=activeStaff().filter(st=>!used.has(st.id));
+  const FONT='"Noto Sans Thai","Th Sarabun New","Tahoma","Arial",sans-serif';
   let teamHeights=[];
   for(let t of teams){
-    let peopleCount=(t.leader?1:0)+(t.members||[]).length, machineCount=(t.machines||[]).length;
-    let peopleRows=Math.max(1,Math.ceil(peopleCount/4)),machineRows=Math.max(1,Math.ceil(machineCount/3));
-    teamHeights.push(250+peopleRows*150+machineRows*170);
+    let pc=(t.leader?1:0)+(t.members||[]).length;
+    let mc=(t.machines||[]).length;
+    let ph=Math.max(1,Math.ceil(pc/4))*118;
+    let mh=mc?Math.ceil(mc/3)*132:0;
+    let th=135+ph+mh+92;
+    teamHeights.push(th);
   }
-  let totalH=390+teamHeights.reduce((a,b)=>a+b+28,0)+(absent.length?150:80);
-  let canvas=document.createElement('canvas');canvas.width=1600;canvas.height=Math.max(2200,totalH);
+  let totalH=300+teamHeights.reduce((a,b)=>a+b+18,0)+(absent.length?105:35);
+  let canvas=document.createElement('canvas');canvas.width=1600;canvas.height=Math.max(1600,totalH);
   let x=canvas.getContext('2d');
-  x.fillStyle='#f5f7fa';x.fillRect(0,0,canvas.width,canvas.height);
-  x.fillStyle='#0b3b68';x.fillRect(0,0,1600,170);
-  x.fillStyle='#fff';x.font='bold 46px sans-serif';x.fillText(kind==='org'?'SFW&T แผนผังทีมงาน':'SFW&T แผนงานประจำวัน',58,70);
-  x.font='25px sans-serif';x.fillText('บริษัท ศักวิเศษ เฟรม แอนด์ ทรัส จำกัด',58,116);
-  x.font='22px sans-serif';x.fillText(`วันที่ ${state.plan.date||'-'}   ${state.plan.site?'สถานที่ '+state.plan.site:''}`,58,152);
+  x.fillStyle='#f5f7fa';x.fillRect(0,0,1600,canvas.height);
+  x.fillStyle='#0b3b68';x.fillRect(0,0,1600,150);
+  x.fillStyle='#fff';x.font=`700 42px ${FONT}`;x.fillText(kind==='org'?'SFW&T แผนผังชุดทำงาน':'SFW&T แผนงานประจำวัน',55,62);
+  x.font=`400 24px ${FONT}`;x.fillText(`วันที่ ${state.plan.date||'-'}   ${state.plan.site?state.plan.site:''}`,55,104);
+  x.font=`400 20px ${FONT}`;drawWrapped(x,state.plan.overall||'',55,136,1480,25,2);
 
-  let y=215;
-  x.fillStyle='#13233a';x.font='bold 27px sans-serif';x.fillText('รายละเอียดแผนงาน',58,y);y+=38;
-  x.font='22px sans-serif';y+=drawWrapped(x,state.plan.overall||'ยังไม่ได้กรอกรายละเอียด',58,y,1460,31,3)+30;
-  if(state.plan.overallMM){x.fillStyle='#66758a';x.font='20px sans-serif';y+=drawWrapped(x,state.plan.overallMM,58,y,1460,29,3)+28}
+  let y=178;
+  for(let i=0;i<teams.length;i++){
+    let t=teams[i],boxH=teamHeights[i],top=y;
+    x.fillStyle='#fff';x.beginPath();x.roundRect(35,top,1530,boxH,22);x.fill();
+    x.strokeStyle='#0b3b68';x.lineWidth=3;x.stroke();
 
-  for(let ti=0;ti<teams.length;ti++){
-    let t=teams[ti],boxH=teamHeights[ti],top=y;
-    x.fillStyle='#fff';x.beginPath();x.roundRect(45,top,1510,boxH,24);x.fill();
-    x.strokeStyle='#0b3b68';x.lineWidth=4;x.stroke();
-    x.fillStyle='#0b3b68';x.font='bold 32px sans-serif';x.fillText(`ชุด ${t.id} • ${t.name||''}`,72,top+48);
+    x.fillStyle='#eef3f8';x.beginPath();x.arc(78,top+44,28,0,Math.PI*2);x.fill();
+    x.fillStyle='#0b3b68';x.font=`700 25px ${FONT}`;x.textAlign='center';x.fillText(t.id,78,top+52);x.textAlign='start';
+    x.fillStyle='#13233a';x.font=`700 27px ${FONT}`;x.fillText(t.name||('ชุดทำงาน '+t.id),120,top+52);
 
-    let cy=top+78;
-    let people=[];
-    if(t.leader)people.push({id:t.leader,leader:true});
-    (t.members||[]).forEach(id=>people.push({id,leader:false}));
-    let px=72, col=0;
-    for(let person of people){
-      let st=staffBy(person.id);if(!st)continue;
-      let src=await imageSrc('staff:'+st.id),im=await loadCanvasImage(src);
-      let bx=72+(col%4)*365, by=cy+Math.floor(col/4)*150;
-      if(im)drawRoundImage(x,im,bx,by,92,92,46);
-      else{x.fillStyle='#e8eef5';x.beginPath();x.arc(bx+46,by+46,46,0,Math.PI*2);x.fill()}
-      x.fillStyle='#13233a';x.font='bold 22px sans-serif';x.fillText((person.leader?'หัวหน้า: ':'')+(st.nick||st.name),bx+108,by+34);
-      x.fillStyle='#66758a';x.font='18px sans-serif';drawWrapped(x,st.role||'',bx+108,by+62,235,24,2);
-      col++;
+    let py=top+78, people=[];
+    if(t.leader)people.push({id:t.leader,lead:true});
+    (t.members||[]).forEach(id=>people.push({id,lead:false}));
+    let pi=0;
+    for(let p of people){
+      let st=staffBy(p.id);if(!st)continue;
+      let bx=55+(pi%4)*380,by=py+Math.floor(pi/4)*118;
+      let im=await loadCanvasImage(await imageSrc('staff:'+st.id));
+      if(im)drawRoundImage(x,im,bx,by,72,72,36);
+      else{x.fillStyle='#e8eef5';x.beginPath();x.arc(bx+36,by+36,36,0,Math.PI*2);x.fill()}
+      x.fillStyle='#13233a';x.font=`700 18px ${FONT}`;drawWrapped(x,(p.lead?'หัวหน้า ':'')+(st.nick||st.name),bx+86,by+28,255,22,2);
+      x.fillStyle='#66758a';x.font=`400 15px ${FONT}`;drawWrapped(x,st.role||'',bx+86,by+58,255,19,1);
+      pi++;
     }
-    cy += Math.max(1,Math.ceil(people.length/4))*150;
+    py += Math.max(1,Math.ceil(people.length/4))*118;
 
-    x.fillStyle='#13233a';x.font='bold 22px sans-serif';x.fillText('เครื่องจักร',72,cy+5);cy+=28;
-    let mi=0;
-    for(let mid of (t.machines||[])){
-      let m=machBy(mid);if(!m)continue;
-      let pics=(await imgGet('machine:'+mid))||[], im=await loadCanvasImage(pics[0]||'');
-      let bx=72+(mi%3)*485, by=cy+Math.floor(mi/3)*170;
-      x.fillStyle='#f8fafc';x.beginPath();x.roundRect(bx,by,455,145,16);x.fill();x.strokeStyle='#d5dde7';x.lineWidth=2;x.stroke();
-      if(im)drawRoundImage(x,im,bx+12,by+12,135,120,14);
-      else{x.fillStyle='#e8eef5';x.fillRect(bx+12,by+12,135,120);x.fillStyle='#0b3b68';x.font='42px sans-serif';x.fillText('⚙',bx+58,by+82)}
-      x.fillStyle='#13233a';x.font='bold 21px sans-serif';drawWrapped(x,m.name||'',bx+165,by+48,270,27,2);
-      x.fillStyle='#66758a';x.font='17px sans-serif';x.fillText(m.code||m.type||'',bx+165,by+112);mi++;
+    if((t.machines||[]).length){
+      let mi=0;
+      for(let mid of t.machines){
+        let m=machBy(mid);if(!m)continue;
+        let pics=(await imgGet('machine:'+mid))||[],im=await loadCanvasImage(pics[0]||'');
+        let bx=55+(mi%3)*500,by=py+Math.floor(mi/3)*132;
+        x.fillStyle='#f8fafc';x.beginPath();x.roundRect(bx,by,470,112,14);x.fill();x.strokeStyle='#d5dde7';x.lineWidth=2;x.stroke();
+        if(im)drawRoundImage(x,im,bx+8,by+8,120,96,10);
+        else{x.fillStyle='#e8eef5';x.fillRect(bx+8,by+8,120,96)}
+        x.fillStyle='#13233a';x.font=`700 17px ${FONT}`;drawWrapped(x,m.name||'',bx+145,by+36,305,22,2);
+        x.fillStyle='#66758a';x.font=`400 14px ${FONT}`;x.fillText(m.code||m.type||'',bx+145,by+83);
+        mi++;
+      }
+      py+=Math.ceil(t.machines.length/3)*132;
     }
-    cy += Math.max(1,Math.ceil((t.machines||[]).length/3))*170;
 
-    x.fillStyle='#eef3f8';x.beginPath();x.roundRect(72,cy,1455,115,14);x.fill();
-    x.fillStyle='#13233a';x.font='bold 22px sans-serif';x.fillText('รายละเอียดงาน',92,cy+32);
-    x.font='20px sans-serif';drawWrapped(x,t.plan||'-',92,cy+62,1400,26,2);
-    if(t.planMM){x.fillStyle='#66758a';x.font='17px sans-serif';drawWrapped(x,t.planMM,92,cy+92,1400,22,1)}
-    y=top+boxH+28;
+    x.fillStyle='#eef3f8';x.beginPath();x.roundRect(55,py,1490,70,12);x.fill();
+    x.fillStyle='#13233a';x.font=`700 18px ${FONT}`;x.fillText('งาน',72,py+27);
+    x.font=`400 17px ${FONT}`;drawWrapped(x,t.plan||'-',125,py+27,1390,21,2);
+    y=top+boxH+18;
   }
 
   if(absent.length){
-    x.fillStyle='#fff';x.beginPath();x.roundRect(45,y,1510,120,20);x.fill();x.strokeStyle='#d5dde7';x.stroke();
-    x.fillStyle='#13233a';x.font='bold 24px sans-serif';x.fillText(`หยุดงาน / ขาดงาน ${absent.length} คน`,72,y+38);
-    x.font='20px sans-serif';x.fillStyle='#66758a';drawWrapped(x,absent.map(st=>st.nick||st.name).join(' • '),72,y+72,1440,27,2);
+    x.fillStyle='#fff';x.beginPath();x.roundRect(35,y,1530,86,18);x.fill();x.strokeStyle='#d5dde7';x.stroke();
+    x.fillStyle='#13233a';x.font=`700 20px ${FONT}`;x.fillText(`หยุดงาน / ขาดงาน ${absent.length} คน`,55,y+30);
+    x.font=`400 17px ${FONT}`;x.fillStyle='#66758a';drawWrapped(x,absent.map(st=>st.nick||st.name).join(' • '),55,y+58,1470,21,2);
   }
   return await new Promise(r=>canvas.toBlob(r,'image/png',.95));
 }
@@ -402,103 +417,78 @@ function wrapText(ctx,text,x,y,max,w){let words=text.split(' '),line='';for(let 
 async function shareBlob(blob,name){let file=new File([blob],name,{type:'image/png'});if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){try{await navigator.share({files:[file],title:name});return}catch(e){if(e.name==='AbortError')return}}let a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 
 async function exportOrgChartImage(){
-  const teams=orderedTeams();
-  const cols=2, cardW=720, gapX=40, margin=60;
+  const teams=orderedTeams(),FONT='"Noto Sans Thai","Th Sarabun New","Tahoma","Arial",sans-serif';
+  const cols=2,cardW=720,gapX=40,margin=60;
   let cardHeights=[];
   for(let t of teams){
-    let pc=(t.leader?1:0)+(t.members||[]).length, mc=(t.machines||[]).length;
-    cardHeights.push(250+Math.ceil(pc/3)*145+Math.ceil(Math.max(1,mc)/2)*175);
+    let pc=(t.leader?1:0)+(t.members||[]).length,mc=(t.machines||[]).length;
+    cardHeights.push(175+Math.max(1,Math.ceil(pc/3))*118+(mc?Math.ceil(mc/2)*125:0)+75);
   }
-  let rows=Math.ceil(teams.length/cols), rowHeights=[];
-  for(let r=0;r<rows;r++)rowHeights.push(Math.max(...cardHeights.slice(r*cols,r*cols+cols),400));
-  let H=420+rowHeights.reduce((a,b)=>a+b+70,0)+100;
-  let c=document.createElement('canvas');c.width=1600;c.height=Math.max(2200,H);let g=c.getContext('2d');
+  let rows=Math.ceil(teams.length/cols),rowHeights=[];
+  for(let r=0;r<rows;r++)rowHeights.push(Math.max(...cardHeights.slice(r*cols,r*cols+cols),320));
+  let H=360+rowHeights.reduce((a,b)=>a+b+45,0)+55;
+  let c=document.createElement('canvas');c.width=1600;c.height=Math.max(1600,H);let g=c.getContext('2d');
   g.fillStyle='#f5f7fa';g.fillRect(0,0,c.width,c.height);
-  g.fillStyle='#0b3b68';g.fillRect(0,0,1600,170);
-  g.fillStyle='#fff';g.font='bold 46px sans-serif';g.fillText('SFW&T แผนผังชุดทำงาน',60,68);
-  g.font='24px sans-serif';g.fillText(`วันที่ ${state.plan.date||'-'}   ${state.plan.site||''}`,60,112);
-  g.font='21px sans-serif';g.fillText(state.plan.overall||'',60,148);
+  g.fillStyle='#0b3b68';g.fillRect(0,0,1600,135);
+  g.fillStyle='#fff';g.font=`700 40px ${FONT}`;g.fillText('SFW&T แผนผังชุดทำงาน',50,55);
+  g.font=`400 21px ${FONT}`;g.fillText(`วันที่ ${state.plan.date||'-'}   ${state.plan.site||''}`,50,94);
+  g.font=`400 18px ${FONT}`;drawWrapped(g,state.plan.overall||'',50,122,1490,22,1);
 
-  // CEO / administrator node
-  let adminPic=await loadCanvasImage(await imageSrc('admin'));
-  let cx=800, top=220;
-  g.fillStyle='#fff';g.beginPath();g.roundRect(cx-310,top,620,150,24);g.fill();g.strokeStyle='#0b3b68';g.lineWidth=4;g.stroke();
-  if(adminPic)drawRoundImage(g,adminPic,cx-280,top+25,100,100,50);
-  else{g.fillStyle='#e8eef5';g.beginPath();g.arc(cx-230,top+75,50,0,Math.PI*2);g.fill();g.fillStyle='#0b3b68';g.font='bold 26px sans-serif';g.fillText('CEO',cx-256,top+84)}
-  g.fillStyle='#13233a';g.font='bold 28px sans-serif';g.fillText(state.admin.name||'ผู้บริหาร',cx-155,top+63);
-  g.font='21px sans-serif';g.fillStyle='#66758a';g.fillText(state.admin.role||'',cx-155,top+98);
+  let adminPic=await loadCanvasImage(await imageSrc('admin')),cx=800,top=165;
+  g.fillStyle='#fff';g.beginPath();g.roundRect(cx-250,top,500,115,20);g.fill();g.strokeStyle='#0b3b68';g.lineWidth=3;g.stroke();
+  if(adminPic)drawRoundImage(g,adminPic,cx-225,top+18,78,78,39);
+  else{g.fillStyle='#e8eef5';g.beginPath();g.arc(cx-186,top+57,39,0,Math.PI*2);g.fill()}
+  g.fillStyle='#13233a';g.font=`700 23px ${FONT}`;g.fillText(state.admin.name||'ผู้บริหาร',cx-125,top+48);
+  g.fillStyle='#66758a';g.font=`400 17px ${FONT}`;g.fillText(state.admin.role||'',cx-125,top+76);
 
-  // trunk
-  let y=top+150;
-  g.strokeStyle='#87a1bb';g.lineWidth=4;g.beginPath();g.moveTo(cx,y);g.lineTo(cx,y+55);g.stroke();
-  y+=55;
-
+  let y=top+115;g.strokeStyle='#87a1bb';g.lineWidth=3;g.beginPath();g.moveTo(cx,y);g.lineTo(cx,y+35);g.stroke();y+=35;
   let idx=0;
   for(let r=0;r<rows;r++){
-    let rh=rowHeights[r];
-    let rowTop=y;
-    let leftCenters=[];
+    let rh=rowHeights[r],rowTop=y,centers=[];
     for(let col=0;col<cols;col++){
       if(idx>=teams.length)break;
-      let t=teams[idx], h=cardHeights[idx], x0=margin+col*(cardW+gapX);
-      let cardCx=x0+cardW/2;leftCenters.push(cardCx);
+      let t=teams[idx],h=cardHeights[idx],x0=margin+col*(cardW+gapX),cc=x0+cardW/2;centers.push(cc);
+      g.beginPath();g.moveTo(cc,rowTop);g.lineTo(cc,rowTop+28);g.stroke();
 
-      // connector from row line
-      g.strokeStyle='#87a1bb';g.lineWidth=4;g.beginPath();g.moveTo(cardCx,rowTop);g.lineTo(cardCx,rowTop+42);g.stroke();
+      let by=rowTop+28;
+      g.fillStyle='#fff';g.beginPath();g.roundRect(x0,by,cardW,h,20);g.fill();g.strokeStyle='#0b3b68';g.lineWidth=3;g.stroke();
+      g.fillStyle='#eef3f8';g.beginPath();g.arc(x0+42,by+39,25,0,Math.PI*2);g.fill();
+      g.fillStyle='#0b3b68';g.font=`700 22px ${FONT}`;g.textAlign='center';g.fillText(t.id,x0+42,by+47);g.textAlign='start';
+      g.fillStyle='#13233a';g.font=`700 23px ${FONT}`;g.fillText(t.name||('ชุดทำงาน '+t.id),x0+82,by+47);
 
-      let by=rowTop+42;
-      g.fillStyle='#fff';g.beginPath();g.roundRect(x0,by,cardW,h,24);g.fill();g.strokeStyle='#0b3b68';g.lineWidth=4;g.stroke();
-
-      // team letter bubble
-      g.fillStyle='#eef3f8';g.beginPath();g.arc(x0+54,by+54,34,0,Math.PI*2);g.fill();
-      g.fillStyle='#0b3b68';g.font='bold 30px sans-serif';g.textAlign='center';g.fillText(t.id,x0+54,by+64);g.textAlign='start';
-      g.fillStyle='#13233a';g.font='bold 27px sans-serif';g.fillText(t.name||('ชุดทำงาน '+t.id),x0+105,by+62);
-
-      let py=by+95, people=[];
-      if(t.leader)people.push({id:t.leader,lead:true});
-      (t.members||[]).forEach(id=>people.push({id,lead:false}));
+      let py=by+73,people=[];if(t.leader)people.push({id:t.leader,lead:true});(t.members||[]).forEach(id=>people.push({id,lead:false}));
       let pi=0;
       for(let p of people){
         let st=staffBy(p.id);if(!st)continue;
-        let px=x0+28+(pi%3)*225, yy=py+Math.floor(pi/3)*145;
-        let im=await loadCanvasImage(await imageSrc('staff:'+st.id));
-        if(im)drawRoundImage(g,im,px,yy,86,86,43);
-        else{g.fillStyle='#e8eef5';g.beginPath();g.arc(px+43,yy+43,43,0,Math.PI*2);g.fill()}
-        g.fillStyle='#13233a';g.font='bold 19px sans-serif';drawWrapped(g,(p.lead?'หัวหน้า ':'')+(st.nick||st.name),px,yy+112,190,23,2);
-        pi++;
+        let px=x0+22+(pi%3)*225,yy=py+Math.floor(pi/3)*118,im=await loadCanvasImage(await imageSrc('staff:'+st.id));
+        if(im)drawRoundImage(g,im,px,yy,68,68,34);
+        else{g.fillStyle='#e8eef5';g.beginPath();g.arc(px+34,yy+34,34,0,Math.PI*2);g.fill()}
+        g.fillStyle='#13233a';g.font=`700 16px ${FONT}`;drawWrapped(g,(p.lead?'หัวหน้า ':'')+(st.nick||st.name),px,yy+91,190,19,2);pi++;
       }
-      py+=Math.ceil(Math.max(1,people.length)/3)*145;
+      py+=Math.max(1,Math.ceil(people.length/3))*118;
 
-      // machines as big visual tiles
       let mi=0;
       for(let mid of (t.machines||[])){
         let m=machBy(mid);if(!m)continue;
-        let pics=(await imgGet('machine:'+mid))||[], im=await loadCanvasImage(pics[0]||'');
-        let mx=x0+28+(mi%2)*335, my=py+Math.floor(mi/2)*175;
-        g.fillStyle='#f8fafc';g.beginPath();g.roundRect(mx,my,310,150,16);g.fill();g.strokeStyle='#d5dde7';g.lineWidth=2;g.stroke();
-        if(im)drawRoundImage(g,im,mx+10,my+10,145,130,12);
-        else{g.fillStyle='#e8eef5';g.fillRect(mx+10,my+10,145,130)}
-        g.fillStyle='#13233a';g.font='bold 18px sans-serif';drawWrapped(g,m.name||'',mx+170,my+55,125,23,3);
-        mi++;
+        let pics=(await imgGet('machine:'+mid))||[],im=await loadCanvasImage(pics[0]||''),mx=x0+22+(mi%2)*335,my=py+Math.floor(mi/2)*125;
+        g.fillStyle='#f8fafc';g.beginPath();g.roundRect(mx,my,310,108,12);g.fill();g.strokeStyle='#d5dde7';g.lineWidth=2;g.stroke();
+        if(im)drawRoundImage(g,im,mx+7,my+7,110,94,9);
+        else{g.fillStyle='#e8eef5';g.fillRect(mx+7,my+7,110,94)}
+        g.fillStyle='#13233a';g.font=`700 15px ${FONT}`;drawWrapped(g,m.name||'',mx+130,my+37,165,18,3);mi++;
       }
-      py+=Math.ceil(Math.max(1,(t.machines||[]).length)/2)*175;
+      if((t.machines||[]).length)py+=Math.ceil(t.machines.length/2)*125;
 
-      g.fillStyle='#eef3f8';g.beginPath();g.roundRect(x0+28,py,cardW-56,92,14);g.fill();
-      g.fillStyle='#13233a';g.font='bold 19px sans-serif';g.fillText('งาน',x0+45,py+29);
-      g.font='18px sans-serif';drawWrapped(g,t.plan||'-',x0+100,py+29,cardW-145,24,2);
-
+      g.fillStyle='#eef3f8';g.beginPath();g.roundRect(x0+22,py,cardW-44,58,10);g.fill();
+      g.fillStyle='#13233a';g.font=`700 16px ${FONT}`;g.fillText('งาน',x0+36,py+24);
+      g.font=`400 15px ${FONT}`;drawWrapped(g,t.plan||'-',x0+82,py+24,cardW-120,18,2);
       idx++;
     }
-    // horizontal branch for this row
-    if(leftCenters.length){
-      g.strokeStyle='#87a1bb';g.lineWidth=4;g.beginPath();
-      g.moveTo(leftCenters[0],rowTop);
-      g.lineTo(leftCenters[leftCenters.length-1],rowTop);
-      g.stroke();
-      g.beginPath();g.moveTo(cx,rowTop-30);g.lineTo(cx,rowTop);g.stroke();
+    if(centers.length){
+      g.strokeStyle='#87a1bb';g.lineWidth=3;g.beginPath();g.moveTo(centers[0],rowTop);g.lineTo(centers[centers.length-1],rowTop);g.stroke();
+      g.beginPath();g.moveTo(cx,rowTop-20);g.lineTo(cx,rowTop);g.stroke();
     }
-    y=rowTop+rh+70;
-    if(r<rows-1){g.beginPath();g.moveTo(cx,y-70);g.lineTo(cx,y);g.stroke()}
+    y=rowTop+rh+45;
+    if(r<rows-1){g.beginPath();g.moveTo(cx,y-45);g.lineTo(cx,y);g.stroke()}
   }
   return await new Promise(r=>c.toBlob(r,'image/png',.95));
 }
