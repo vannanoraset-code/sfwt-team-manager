@@ -12,11 +12,17 @@ label{font-size:12px;color:var(--muted);font-weight:700;display:block;margin:7px
 .modal{position:fixed;inset:0;background:#0008;z-index:50;display:none;align-items:flex-end}.modal.show{display:flex}.sheet{width:100%;background:#fff;border-radius:20px 20px 0 0;max-height:90vh;overflow:auto;padding:14px max(16px,env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}.sheetHead{position:sticky;top:-14px;background:#fff;z-index:2;padding:8px 0;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}.sheetHead h3{margin:0}.closeBtn{border:0;background:#eef3f8;color:var(--navy);border-radius:10px;padding:9px 12px;font-weight:900}.photoGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.photoTile{position:relative}.photoTile img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;border:1px solid var(--line)}.photoTile button{position:absolute;right:4px;top:4px;border:0;border-radius:8px;background:#0009;color:#fff}.langMM{font-size:11px;color:#728298;display:block;margin-top:1px}
 @media(max-width:760px){.cards{grid-template-columns:repeat(2,1fr)}.grid2,.grid3{grid-template-columns:1fr}.teamGrid{grid-template-columns:1fr}.brand h1{font-size:17px}.brand small{font-size:11px}.pageTitle h2{font-size:20px}.bottomNav{height:72px}.org{min-width:900px}}
 @media print{header,.bottomNav,.noPrint{display:none!important}main{padding:0}.page{display:none!important}.page#printPage{display:block!important}}
-</style><meta name="sfwt-version" content="v41-persistent-worksets"></head><body>
+</style><meta name="sfwt-version" content="v43-rich-image-export"></head><body>
 <header><div class="brand"><img src="sft-logo.jpg"><div><h1>SFW&T บริหารทีมงาน</h1><small>บริษัท ศักวิเศษ เฟรม แอนด์ ทรัส จำกัด</small></div><div class="topActions"><button class="iconBtn" onclick="toggleLang()" id="langBtn">TH / မြန်မာ</button></div></div></header>
 <main>
-<section class="page active" id="dashboardPage"><div class="pageTitle"><h2>ภาพรวม <span class="langMM">အကျဉ်းချုပ်</span></h2><button class="btn navy" onclick="exportPlan()">📤 ส่งแผน</button></div><div class="cards" id="stats"></div><div class="panel"><h3>แผนงานวันนี้ <span class="langMM">ယနေ့အလုပ်အစီအစဉ်</span></h3><div id="todaySummary"></div></div><div class="panel"><h3>ทีมทั้งหมด</h3><div id="dashboardTeams" class="teamGrid"></div></div></section>
-<section class="page" id="planPage"><div class="pageTitle"><h2>แผนงาน <span class="langMM">အလုပ်အစီအစဉ်</span></h2><button class="btn red" onclick="savePlan()">บันทึกแผน</button></div><div class="panel"><div class="grid2"><div><label>วันที่</label><input type="date" id="planDate"></div><div><label>ไซต์งาน / พื้นที่</label><input id="planSite" placeholder="เช่น เขต A ชั้น 1"></div></div><label>รายละเอียดแผนงานรวม</label><textarea id="planOverall" placeholder="กรอกรายละเอียดงาน เป้าหมาย ลำดับงาน จุดตรวจ และหมายเหตุ"></textarea><label>ภาษาพม่า (แปลอัตโนมัติ) / မြန်မာ</label><textarea id="planOverallMM" readonly placeholder="ระบบจะแปลจากภาษาไทยอัตโนมัติ"></textarea></div><div id="teamPlanEditors"></div></section>
+<section class="page active" id="dashboardPage"><div class="pageTitle"><h2>ภาพรวม <span class="langMM">အကျဉ်းချုပ်</span></h2><button class="btn navy" onclick="exportPlan()">📤 ส่งแผน</button></div><div class="cards" id="stats"></div><div class="panel"><h3>แผนงานวันนี้ <span class="langMM">ယနေ့အလုပ်အစီအစဉ်</span></h3><div id="todaySummary"></div></div><div class="panel"><h3>ชุดทำงานทั้งหมด</h3><div id="dashboardTeams" class="teamGrid"></div></div></section>
+<section class="page" id="planPage"><div class="pageTitle"><h2>แผนงาน <span class="langMM">အလုပ်အစီအစဉ်</span></h2><button class="btn red" onclick="savePlan()">บันทึกแผน</button></div><div class="panel"><div class="grid2"><div><label>วันที่</label><input type="date" id="planDate"></div><div><label>ไซต์งาน / พื้นที่</label><input id="planSite" placeholder="เช่น ชั้น 1 / โซนติดตั้ง / พื้นที่งาน"></div></div><label>รายละเอียดแผนงานรวม</label><textarea id="planOverall" placeholder="กรอกรายละเอียดงาน เป้าหมาย ลำดับงาน จุดตรวจ และหมายเหตุ"></textarea><label>ภาษาพม่า (แปลอัตโนมัติ) / မြန်မာ</label><textarea id="planOverallMM" readonly placeholder="ระบบจะแปลจากภาษาไทยอัตโนมัติ"></textarea></div><div id="teamPlanEditors"></div>
+<div class="panel">
+  <div class="pageTitle" style="margin:0 0 10px">
+    <h3 style="margin:0">ประวัติแผนงานย้อนหลัง</h3>
+  </div>
+  <div id="historyList"></div>
+</div></section>
 <section class="page" id="staffPage"><div class="pageTitle"><h2>พนักงาน <span class="langMM">ဝန်ထမ်း</span></h2><button class="btn red" onclick="openStaffEditor()">＋ เพิ่มพนักงาน</button></div><div class="panel"><input id="staffSearch" placeholder="ค้นหาชื่อ / ตำแหน่ง" oninput="renderStaff()"></div><div id="staffList" class="list"></div></section>
 <section class="page" id="machinePage"><div class="pageTitle"><h2>เครื่องจักร <span class="langMM">စက်ယန္တရား</span></h2><button class="btn red" onclick="openMachineEditor()">＋ เพิ่มเครื่องจักร</button></div><div id="machineList" class="list"></div></section>
 <section class="page" id="teamsPage"><div class="pageTitle"><h2>จัดทีม <span class="langMM">အဖွဲ့စီမံခြင်း</span></h2><button class="btn navy" onclick="exportPlan()">📤 ส่งออกภาพ</button></div><div class="panel muted">เลือกหัวหน้า เพิ่ม/ย้ายพนักงาน และเลือกเครื่องจักรได้หลายคันต่อทีม รูปจะดึงจากหน้าพนักงานและเครื่องจักรอัตโนมัติ</div><div id="teamEditorGrid" class="teamGrid"></div></section>
@@ -110,6 +116,74 @@ function validateUniqueTeam(teamId,leader,members,machines){
   return '';
 }
 function staffBy(id){return state.staff.find(x=>x.id===id)}function machBy(id){return state.machines.find(x=>x.id===id)}function teamBy(id){return state.teams.find(x=>x.id===id)}
+state.history ||= [];
+function assignedStaffIds(teams=state.teams){
+  let set=new Set();
+  teams.forEach(t=>{if(t.leader)set.add(t.leader);(t.members||[]).forEach(id=>set.add(id))});
+  return [...set];
+}
+function activeStaff(){return state.staff.filter(s=>s.status!=='resigned')}
+function absentStaffIds(teams=state.teams){
+  let assigned=new Set(assignedStaffIds(teams));
+  return activeStaff().filter(s=>!assigned.has(s.id)).map(s=>s.id);
+}
+function deepCopy(v){return JSON.parse(JSON.stringify(v))}
+function historyByDate(date){return state.history.find(h=>h.date===date)}
+function attendanceStats(staffId){
+  let work=0,off=0;
+  for(let h of state.history){
+    if((h.presentIds||[]).includes(staffId))work++;
+    else if((h.activeIds||[]).includes(staffId))off++;
+  }
+  return {work,off};
+}
+function snapshotCurrentPlan(){
+  let activeIds=activeStaff().map(s=>s.id),presentIds=assignedStaffIds(),absentIds=activeIds.filter(id=>!presentIds.includes(id));
+  return {
+    date:state.plan.date||new Date().toISOString().slice(0,10),
+    savedAt:new Date().toISOString(),
+    site:state.plan.site||'',
+    overall:state.plan.overall||'',
+    overallMM:state.plan.overallMM||'',
+    teams:deepCopy(orderedTeams()),
+    activeIds,presentIds,absentIds
+  };
+}
+function saveHistorySnapshot(){
+  let snap=snapshotCurrentPlan(),i=state.history.findIndex(h=>h.date===snap.date);
+  if(i>=0)state.history[i]=snap; else state.history.push(snap);
+  state.history.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+}
+function restoreHistory(date){
+  let h=historyByDate(date);if(!h)return;
+  if(!confirm('นำแผนวันที่ '+date+' กลับมาใช้เป็นแผนปัจจุบัน?'))return;
+  state.plan={date:h.date,site:h.site||'',overall:h.overall||'',overallMM:h.overallMM||''};
+  state.teams=deepCopy(h.teams||[]);
+  save();alert('นำแผนวันที่ '+date+' กลับมาแล้ว แก้ไขต่อได้ทันที');
+}
+function viewHistory(date){
+  let h=historyByDate(date);if(!h)return;
+  let absent=(h.absentIds||[]).map(id=>staffBy(id)).filter(Boolean);
+  let cards=(h.teams||[]).map(t=>{
+    let lead=staffBy(t.leader);
+    let members=(t.members||[]).map(id=>staffBy(id)?.nick||staffBy(id)?.name).filter(Boolean).join(' • ');
+    let machines=(t.machines||[]).map(id=>machBy(id)?.name).filter(Boolean).join(' • ');
+    return `<div class=panel style="margin:8px 0"><b>ชุด ${esc(t.id)} • ${esc(t.name||'')}</b><div>หัวหน้า: ${lead?esc(lead.nick||lead.name):'-'}</div><div>ลูกทีม: ${esc(members||'-')}</div><div>เครื่องจักร: ${esc(machines||'-')}</div><div>งาน: ${esc(t.plan||'-')}</div></div>`;
+  }).join('');
+  openModal('ประวัติ '+date,`<div><b>${esc(h.site||'ยังไม่ระบุไซต์')}</b><div class=muted>${esc(h.overall||'')}</div></div>
+    <div class=panel style="margin-top:10px"><b>หยุดงาน ${absent.length} คน</b><div>${absent.length?absent.map(s=>esc(s.nick||s.name)).join(' • '):'ไม่มี'}</div></div>
+    ${cards}
+    <button class="btn navy full" onclick="closeModal();restoreHistory('${date}')">ใช้แผนนี้อีกครั้ง</button>`);
+}
+function renderHistory(){
+  let el=document.getElementById('historyList');if(!el)return;
+  if(!state.history.length){el.innerHTML='<div class=muted>ยังไม่มีประวัติ เมื่อกด “บันทึกแผน” ระบบจะเก็บประวัติให้อัตโนมัติ</div>';return}
+  el.innerHTML=state.history.map(h=>{
+    let absent=(h.absentIds||[]).length;
+    return `<div class=personCard><div class=grow><b>${esc(h.date)} • ${esc(h.site||'ไม่ระบุไซต์')}</b><small>มาทำงาน ${(h.presentIds||[]).length} คน • หยุดงาน ${absent} คน</small><div class=muted>${esc(h.overall||'')}</div></div><button class=btn onclick="viewHistory('${h.date}')">ดู</button></div>`;
+  }).join('');
+}
+
 function teamOrder(a,b){return String(a.id).localeCompare(String(b.id),undefined,{numeric:true})}
 function orderedTeams(){return [...state.teams].sort(teamOrder)}
 function nextTeamId(){return workLabel(state.teams.length)}
@@ -132,8 +206,12 @@ function pick(kind,key,after){photoTarget={kind,key,after};let f=document.getEle
 function pickAdminPhoto(){pick('admin','admin',renderOrg)}
 function pickStaffPhoto(id){pick('staff','staff:'+id,()=>{renderStaff();renderTeams();renderOrg()})}
 function pickMachinePhotos(id){pick('machine','machine:'+id,()=>{renderMachines();renderTeams();renderOrg()})}
-async function renderStats(){let used=new Set(state.teams.flatMap(t=>[t.leader,...t.members]));document.getElementById('stats').innerHTML=`<div class=stat><b>${state.staff.length}</b><small>พนักงาน / ဝန်ထမ်း</small></div><div class=stat><b>${state.machines.length}</b><small>เครื่องจักร / စက်</small></div><div class=stat><b>${state.teams.length}</b><small>ทีม / အဖွဲ့</small></div><div class=stat><b>${state.staff.length-used.size}</b><small>คนว่าง / အရန်</small></div>`;document.getElementById('todaySummary').innerHTML=`<b>${esc(state.plan.site||'ยังไม่ระบุไซต์')}</b><div class=muted>${esc(state.plan.overall||'ยังไม่ได้กรอกรายละเอียดแผนงาน')}</div><span class=langMM>${esc(state.plan.overallMM||'')}</span>`}
-async function staffCard(s){let p=await imageSrc('staff:'+s.id);return `<div class=personCard>${p?`<img class=avatar src="${p}">`:`<div class="avatar placeholder">${esc((s.nick||s.name).slice(0,2))}</div>`}<div class=grow><b>${esc(s.nick||'')} ${esc(s.name)}</b><small>${esc(s.role)}</small><span class=langMM>${esc(s.roleMM||'')}</span></div><button class=btn onclick="pickStaffPhoto('${s.id}')">📷</button><button class=btn onclick="openStaffEditor('${s.id}')">✏️</button></div>`}
+async function renderStats(){
+  let used=new Set(assignedStaffIds()),active=activeStaff(),absent=active.filter(x=>!used.has(x.id));
+  document.getElementById('stats').innerHTML=`<div class=stat><b>${state.staff.length}</b><small>พนักงาน / ဝန်ထမ်း</small></div><div class=stat><b>${state.machines.length}</b><small>เครื่องจักร / စက်</small></div><div class=stat><b>${state.teams.length}</b><small>ชุดทำงาน / အဖွဲ့</small></div><div class=stat><b>${absent.length}</b><small>หยุดงาน / ขาดงาน</small></div>`;
+  document.getElementById('todaySummary').innerHTML=`<b>${esc(state.plan.site||'ยังไม่ระบุไซต์')}</b><div class=muted>${esc(state.plan.overall||'ยังไม่ได้กรอกรายละเอียดแผนงาน')}</div><span class=langMM>${esc(state.plan.overallMM||'')}</span><div class="panel" style="margin-top:10px"><b>รายชื่อหยุดงาน ${absent.length} คน</b><div>${absent.length?absent.map(x=>esc(x.nick||x.name)).join(' • '):'ไม่มี'}</div></div>`;
+}
+async function staffCard(s){let p=await imageSrc('staff:'+s.id),a=attendanceStats(s.id),todayAssigned=new Set(assignedStaffIds()).has(s.id);return `<div class=personCard>${p?`<img class=avatar src="${p}">`:`<div class="avatar placeholder">${esc((s.nick||s.name).slice(0,2))}</div>`}<div class=grow><b>${esc(s.nick||'')} ${esc(s.name)}</b><small>${esc(s.role)}</small><span class=langMM>${esc(s.roleMM||'')}</span><small><b>${todayAssigned?'มาทำงาน':'หยุดงาน'}</b> • ประวัติ: ทำงาน ${a.work} วัน • หยุด ${a.off} วัน</small></div><button class=btn onclick="pickStaffPhoto('${s.id}')">📷</button><button class=btn onclick="openStaffEditor('${s.id}')">✏️</button></div>`}
 async function renderStaff(){let q=(document.getElementById('staffSearch')?.value||'').toLowerCase(),arr=state.staff.filter(s=>(s.name+s.nick+s.role).toLowerCase().includes(q));let parts=[];for(let s of arr)parts.push(await staffCard(s));document.getElementById('staffList').innerHTML=parts.join('')}
 function openStaffEditor(id=''){let s=id?staffBy(id):{id:nextId('s',state.staff),name:'',nick:'',role:'',roleMM:'',lang:'MM',status:'active'};openModal(id?'แก้ไขพนักงาน':'เพิ่มพนักงาน',`<div class=grid2><div><label>ชื่อ-นามสกุล</label><input id=eName value="${esc(s.name)}"></div><div><label>ชื่อเล่น</label><input id=eNick value="${esc(s.nick)}"></div></div><label>ตำแหน่ง (แก้ไขภาษาไทย)</label><input id=eRole value="${esc(s.role)}" oninput="autoTranslate('eRole','eRoleMM')"><label>ตำแหน่งภาษาพม่า (แปลอัตโนมัติ)</label><input id=eRoleMM readonly value="${esc(s.roleMM||'')}"><div class=grid2><div><label>ภาษา</label><select id=eLang><option ${s.lang==='TH'?'selected':''}>TH</option><option ${s.lang==='MM'?'selected':''}>MM</option><option ${s.lang==='LA'?'selected':''}>LA</option><option ${s.lang==='MM/TH'?'selected':''}>MM/TH</option></select></div><div><label>สถานะ</label><select id=eStatus><option value=active ${s.status==='active'?'selected':''}>ทำงาน</option><option value=leave ${s.status==='leave'?'selected':''}>ลา</option><option value=resigned ${s.status==='resigned'?'selected':''}>ลาออก</option></select></div></div><div class="row wrap" style="margin-top:12px"><button class="btn navy" onclick="saveStaffEditor('${s.id}',${id?'true':'false'})">💾 บันทึก</button><button class=btn onclick="pickStaffPhoto('${s.id}')">📷 รูปพนักงาน</button>${id?`<button class="btn danger" onclick="deleteStaff('${s.id}')">ลบ</button>`:''}</div>`)}
 async function saveStaffEditor(id,exists){let role=document.getElementById('eRole').value.trim();let o={id,name:document.getElementById('eName').value.trim(),nick:document.getElementById('eNick').value.trim(),role,roleMM:await translateTH(role),lang:document.getElementById('eLang').value,status:document.getElementById('eStatus').value};if(!o.name)return alert('กรุณาใส่ชื่อพนักงาน');if(exists)Object.assign(staffBy(id),o);else state.staff.push(o);closeModal();save()}
@@ -163,8 +241,13 @@ async function saveTeamEditor(id){
   t.name=document.getElementById('tName').value.trim();t.zone='';t.leader=leader;t.members=members;t.machines=machines;
   t.plan=document.getElementById('tPlan').value;t.planMM=await translateTH(t.plan);closeModal();save()
 }
-async function teamCard(t,edit=false){let lead=staffBy(t.leader),lp=lead?await imageSrc('staff:'+lead.id):'',people=[];for(let id of t.members){let s=staffBy(id);if(!s)continue;let p=await imageSrc('staff:'+id);people.push(`<div class=chip>${p?`<img src="${p}">`:`<span>👷</span>`}${esc(s.nick||s.name)}</div>`)}let ms=[];for(let id of t.machines){let m=machBy(id);if(!m)continue;let pics=(await imgGet('machine:'+id))||[];ms.push(`<div class=machMini>${pics[0]?`<img src="${pics[0]}">`:`<div class="thumb placeholder">🏗️</div>`}<div class=grow><b>${esc(m.name)}</b><span class=langMM>${esc(m.nameMM||'')}</span></div></div>`)}return `<div class="teamCard ${t.zone==='A'?'zoneA':''}"><div class=teamHead><div><span class="tag ${''}">เขต ${t.zone}</span><h3 style="margin:5px 0">${esc(t.name)}</h3><div class=muted>${lead?`หัวหน้า: ${esc(lead.nick||lead.name)} / ${esc(lead.name)}`:'ยังไม่เลือกหัวหน้า'}</div></div>${edit?`<button class=btn onclick="openTeamEditor('${t.id}')">✏️ ปรับทีม</button>`:''}</div>${lead?`<div class=personCard style="margin-top:8px">${lp?`<img class=avatar src="${lp}">`:`<div class="avatar placeholder">${esc((lead.nick||lead.name).slice(0,2))}</div>`}<div class=grow><b>${esc(lead.nick||'')} ${esc(lead.name)}</b><small>${esc(lead.role)}</small><span class=langMM>${esc(lead.roleMM||'')}</span></div></div>`:''}<div class=teamPeople>${people.join('')||'<span class=muted>ยังไม่มีลูกทีม</span>'}</div><div class=machList>${ms.join('')||'<span class=muted>ยังไม่มีเครื่องจักร</span>'}</div><div class=planBox><b>งาน:</b> ${esc(t.plan||'-')}<span class=langMM>${esc(t.planMM||'')}</span></div></div>`}
-async function renderTeams(){let a=[],b=[];for(let t of orderedTeams()){let c=await teamCard(t,true);(t.zone==='A'?a:b).push(c)}document.getElementById('teamEditorGrid').innerHTML=`<div style="grid-column:1/-1"><h3>เขต A • ทีมหลัก</h3></div>${a.join('')}<div style="grid-column:1/-1"><h3>เขต B • ทีมย่อย/เก็บงาน</h3></div>${b.join('')}`;let d=[];for(let t of orderedTeams())d.push(await teamCard(t,false));document.getElementById('dashboardTeams').innerHTML=d.join('')}
+async function teamCard(t,edit=false){let lead=staffBy(t.leader),lp=lead?await imageSrc('staff:'+lead.id):'',people=[];for(let id of t.members){let s=staffBy(id);if(!s)continue;let p=await imageSrc('staff:'+id);people.push(`<div class=chip>${p?`<img src="${p}">`:`<span>👷</span>`}${esc(s.nick||s.name)}</div>`)}let ms=[];for(let id of t.machines){let m=machBy(id);if(!m)continue;let pics=(await imgGet('machine:'+id))||[];ms.push(`<div class=machMini>${pics[0]?`<img src="${pics[0]}">`:`<div class="thumb placeholder">🏗️</div>`}<div class=grow><b>${esc(m.name)}</b><span class=langMM>${esc(m.nameMM||'')}</span></div></div>`)}return `<div class="teamCard"><div class=teamHead><div><span class="tag">${esc(t.id)}</span><h3 style="margin:5px 0">${esc(t.name)}</h3><div class=muted>${lead?`หัวหน้า: ${esc(lead.nick||lead.name)} / ${esc(lead.name)}`:'ยังไม่เลือกหัวหน้า'}</div></div>${edit?`<button class=btn onclick="openTeamEditor('${t.id}')">✏️ ปรับทีม</button>`:''}</div>${lead?`<div class=personCard style="margin-top:8px">${lp?`<img class=avatar src="${lp}">`:`<div class="avatar placeholder">${esc((lead.nick||lead.name).slice(0,2))}</div>`}<div class=grow><b>${esc(lead.nick||'')} ${esc(lead.name)}</b><small>${esc(lead.role)}</small><span class=langMM>${esc(lead.roleMM||'')}</span></div></div>`:''}<div class=teamPeople>${people.join('')||'<span class=muted>ยังไม่มีลูกทีม</span>'}</div><div class=machList>${ms.join('')||'<span class=muted>ยังไม่มีเครื่องจักร</span>'}</div><div class=planBox><b>งาน:</b> ${esc(t.plan||'-')}<span class=langMM>${esc(t.planMM||'')}</span></div></div>`}
+async function renderTeams(){
+  let e=[];for(let t of orderedTeams())e.push(await teamCard(t,true));
+  document.getElementById('teamEditorGrid').innerHTML=e.join('');
+  let d=[];for(let t of orderedTeams())d.push(await teamCard(t,false));
+  document.getElementById('dashboardTeams').innerHTML=d.join('');
+}
 function loadPlanForm(){
   document.getElementById('planDate').value=state.plan.date||'';
   document.getElementById('planSite').value=state.plan.site||'';
@@ -181,19 +264,139 @@ async function savePlan(){
   state.plan.overall=document.getElementById('planOverall').value;
   state.plan.overallMM=await translateTH(state.plan.overall);
   for(let t of orderedTeams()){t.plan=document.getElementById('plan_'+t.id).value;t.planMM=await translateTH(t.plan)}
-  save();alert('บันทึกแผนงานแล้ว • ภาษาพม่าแปลอัตโนมัติแล้ว')
+  saveHistorySnapshot();
+  save();alert('บันทึกแผนงานและเก็บประวัติแล้ว • คนที่ไม่ได้อยู่ในชุดทำงานถูกนับเป็นหยุดงาน');
 }
 function saveAdmin(){state.admin.name=document.getElementById('adminName').value;state.admin.role=document.getElementById('adminRole').value;save()}
 async function orgImg(key,fallback){let p=await imageSrc(key);return p||fallback}
-async function renderOrg(){document.getElementById('adminName').value=state.admin.name;document.getElementById('adminRole').value=state.admin.role;let ap=await imageSrc('admin'),teams=[];for(let t of orderedTeams()){let l=staffBy(t.leader),lp=l?await imageSrc('staff:'+l.id):'',mem=[];for(let id of t.members){let s=staffBy(id);if(!s)continue;let p=await imageSrc('staff:'+id);mem.push(`<div class=orgMember>${p?`<img src="${p}">`:`<div class="avatar placeholder" style="width:36px;height:36px">${esc((s.nick||s.name).slice(0,1))}</div>`}<div><b>${esc(s.nick||s.name)}</b><small>${esc(s.role)}</small></div></div>`)}let mm=[];for(let id of t.machines){let pics=(await imgGet('machine:'+id))||[];if(pics[0])mm.push(`<img src="${pics[0]}" title="${esc(machBy(id)?.name||'')}">`)}teams.push(`<div class=orgTeam><div class=orgLeader>${lp?`<img src="${lp}">`:`<div class="avatar placeholder" style="width:58px;height:58px">${l?esc((l.nick||l.name).slice(0,2)):'?'}</div>`}<div><span class="tag ${''}">${esc(t.id)}</span><b style="display:block">${l?esc(l.nick||l.name):'ยังไม่เลือก'}</b><small>${l?esc(l.role):''}</small></div></div><div class=orgMembers>${mem.join('')}</div><div class=orgMachines>${mm.join('')}</div></div>`)}let ordered=orderedTeams(), aCount=ordered.filter(t=>t.zone==='A').length;
-let aCards=teams.slice(0,aCount).join(''), bCards=teams.slice(aCount).join('');
-document.getElementById('orgChart').innerHTML=`<div class=orgCEO>${ap?`<img src="${ap}">`:`<div class="avatar placeholder" style="width:78px;height:78px">CEO</div>`}<div><h2 style="margin:0">${esc(state.admin.name)}</h2><b>${esc(state.admin.role)}</b></div></div>
-<div class="zoneTitle"><b>เขต A</b> • ด้านบน</div><div class=orgTeams>${aCards||'<div class=muted>ยังไม่มีชุดทำงานเขต A</div>'}</div>
-<div class="zoneTitle" style="margin-top:22px"><b>เขต B</b> • ด้านล่าง</div><div class=orgTeams>${bCards||'<div class=muted>ยังไม่มีชุดทำงานเขต B</div>'}</div>`}
-async function exportElement(kind){let canvas=document.createElement('canvas');canvas.width=1600;canvas.height=2200;let x=canvas.getContext('2d');x.fillStyle='#f5f7fa';x.fillRect(0,0,1600,2200);x.fillStyle='#0b3b68';x.fillRect(0,0,1600,150);x.fillStyle='#fff';x.font='bold 45px sans-serif';x.fillText(kind==='org'?'SFW&T แผนผังทีมงาน':'SFW&T แผนงานประจำวัน',60,70);x.font='25px sans-serif';x.fillText('บริษัท ศักวิเศษ เฟรม แอนด์ ทรัส จำกัด',60,112);let y=190;x.fillStyle='#13233a';x.font='bold 27px sans-serif';x.fillText((state.plan.site||'')+'  '+(state.plan.date||''),60,y);y+=45;x.font='22px sans-serif';wrapText(x,state.plan.overall||'',60,y,1480,30);y+=80;for(let t of orderedTeams()){if(y>2060)break;let lead=staffBy(t.leader);x.fillStyle='#fff';x.fillRect(50,y,1500,230);x.strokeStyle='#0b3b68';x.lineWidth=5;x.strokeRect(50,y,1500,230);x.fillStyle='#13233a';x.font='bold 25px sans-serif';x.fillText(`${t.id} • ${t.name}`,75,y+38);x.font='21px sans-serif';x.fillText(`หัวหน้า: ${lead?lead.nick||lead.name:'-'}`,75,y+75);x.fillText(`ลูกทีม: ${t.members.map(id=>staffBy(id)?.nick||staffBy(id)?.name).filter(Boolean).join(' • ')}`,75,y+108);x.fillText(`เครื่องจักร: ${t.machines.map(id=>machBy(id)?.name).filter(Boolean).join(' • ')}`,75,y+141);x.fillText(`งาน: ${t.plan||'-'}`,75,y+174);x.font='19px sans-serif';x.fillStyle='#66758a';x.fillText(t.planMM||'',75,y+204);y+=250}return await new Promise(r=>canvas.toBlob(r,'image/png',.95))}
+async function renderOrg(){
+  document.getElementById('adminName').value=state.admin.name;
+  document.getElementById('adminRole').value=state.admin.role;
+  let ap=await imageSrc('admin'),cards=[];
+  for(let t of orderedTeams()){
+    let l=staffBy(t.leader),lp=l?await imageSrc('staff:'+l.id):'',mem=[];
+    for(let id of (t.members||[])){
+      let st=staffBy(id); if(!st)continue;
+      let pic=await imageSrc('staff:'+id);
+      mem.push(`<div class=orgMember>${pic?`<img src="${pic}">`:`<div class="avatar placeholder" style="width:36px;height:36px">${esc((st.nick||st.name).slice(0,1))}</div>`}<div><b>${esc(st.nick||st.name)}</b><small>${esc(st.role)}</small></div></div>`);
+    }
+    let mach=[];
+    for(let id of (t.machines||[])){
+      let m=machBy(id); if(!m)continue;
+      let pics=(await imgGet('machine:'+id))||[];
+      mach.push(`<div class=orgMember>${pics[0]?`<img src="${pics[0]}">`:`<div class="avatar placeholder" style="width:36px;height:36px">⚙️</div>`}<div><b>${esc(m.name)}</b><small>${esc(m.code||m.type||'')}</small></div></div>`);
+    }
+    cards.push(`<div class=orgTeam>
+      <div class=orgLeader>${lp?`<img src="${lp}">`:`<div class="avatar placeholder" style="width:58px;height:58px">${l?esc((l.nick||l.name).slice(0,2)):'?'}</div>`}
+        <div><span class=tag>${esc(t.id)}</span><b style="display:block">${l?esc(l.nick||l.name):'ยังไม่เลือกหัวหน้า'}</b><small>${l?esc(l.role):''}</small></div>
+      </div>
+      <div class=orgMembers>${mem.join('')}</div>
+      <div class=orgMembers>${mach.join('')}</div>
+      <div class=panel style="margin-top:8px"><b>งาน:</b> ${esc(t.plan||'-')}<div class=langMM>${esc(t.planMM||'')}</div></div>
+    </div>`);
+  }
+  document.getElementById('orgChart').innerHTML=`<div class=orgCEO>${ap?`<img src="${ap}">`:`<div class="avatar placeholder" style="width:78px;height:78px">CEO</div>`}<div><h2 style="margin:0">${esc(state.admin.name)}</h2><b>${esc(state.admin.role)}</b></div></div>
+  <div class="zoneTitle"><b>ชุดทำงาน ${state.teams.length} ชุด</b> • ${esc(state.plan.date||'')} • ${esc(state.plan.site||'')}</div>
+  <div class=orgTeams>${cards.join('')||'<div class=muted>ยังไม่มีชุดทำงาน</div>'}</div>`;
+}
+function loadCanvasImage(src){
+  return new Promise(resolve=>{
+    if(!src)return resolve(null);
+    let im=new Image(); im.onload=()=>resolve(im); im.onerror=()=>resolve(null); im.src=src;
+  });
+}
+function drawRoundImage(ctx,img,x,y,w,h,r=18){
+  if(!img)return;
+  ctx.save();ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);ctx.clip();
+  let ir=img.width/img.height,br=w/h,sx=0,sy=0,sw=img.width,sh=img.height;
+  if(ir>br){sw=img.height*br;sx=(img.width-sw)/2}else{sh=img.width/br;sy=(img.height-sh)/2}
+  ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h);ctx.restore();
+}
+function drawWrapped(ctx,text,x,y,maxWidth,lineHeight,maxLines=3){
+  text=String(text||'');let words=text.includes(' ')?text.split(/\s+/):[...text],line='',lines=[];
+  for(let w of words){let test=line+(line?' ':'')+w;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=w;if(lines.length>=maxLines-1)break}else line=test}
+  if(line&&lines.length<maxLines)lines.push(line);
+  lines.forEach((ln,i)=>ctx.fillText(ln,x,y+i*lineHeight));
+  return lines.length*lineHeight;
+}
+async function exportElement(kind){
+  const teams=orderedTeams(), absent=activeStaff().filter(st=>!new Set(assignedStaffIds()).has(st.id));
+  let teamHeights=[];
+  for(let t of teams){
+    let peopleCount=(t.leader?1:0)+(t.members||[]).length, machineCount=(t.machines||[]).length;
+    let peopleRows=Math.max(1,Math.ceil(peopleCount/4)),machineRows=Math.max(1,Math.ceil(machineCount/3));
+    teamHeights.push(250+peopleRows*150+machineRows*170);
+  }
+  let totalH=390+teamHeights.reduce((a,b)=>a+b+28,0)+(absent.length?150:80);
+  let canvas=document.createElement('canvas');canvas.width=1600;canvas.height=Math.max(2200,totalH);
+  let x=canvas.getContext('2d');
+  x.fillStyle='#f5f7fa';x.fillRect(0,0,canvas.width,canvas.height);
+  x.fillStyle='#0b3b68';x.fillRect(0,0,1600,170);
+  x.fillStyle='#fff';x.font='bold 46px sans-serif';x.fillText(kind==='org'?'SFW&T แผนผังทีมงาน':'SFW&T แผนงานประจำวัน',58,70);
+  x.font='25px sans-serif';x.fillText('บริษัท ศักวิเศษ เฟรม แอนด์ ทรัส จำกัด',58,116);
+  x.font='22px sans-serif';x.fillText(`วันที่ ${state.plan.date||'-'}   ${state.plan.site?'สถานที่ '+state.plan.site:''}`,58,152);
+
+  let y=215;
+  x.fillStyle='#13233a';x.font='bold 27px sans-serif';x.fillText('รายละเอียดแผนงาน',58,y);y+=38;
+  x.font='22px sans-serif';y+=drawWrapped(x,state.plan.overall||'ยังไม่ได้กรอกรายละเอียด',58,y,1460,31,3)+30;
+  if(state.plan.overallMM){x.fillStyle='#66758a';x.font='20px sans-serif';y+=drawWrapped(x,state.plan.overallMM,58,y,1460,29,3)+28}
+
+  for(let ti=0;ti<teams.length;ti++){
+    let t=teams[ti],boxH=teamHeights[ti],top=y;
+    x.fillStyle='#fff';x.beginPath();x.roundRect(45,top,1510,boxH,24);x.fill();
+    x.strokeStyle='#0b3b68';x.lineWidth=4;x.stroke();
+    x.fillStyle='#0b3b68';x.font='bold 32px sans-serif';x.fillText(`ชุด ${t.id} • ${t.name||''}`,72,top+48);
+
+    let cy=top+78;
+    let people=[];
+    if(t.leader)people.push({id:t.leader,leader:true});
+    (t.members||[]).forEach(id=>people.push({id,leader:false}));
+    let px=72, col=0;
+    for(let person of people){
+      let st=staffBy(person.id);if(!st)continue;
+      let src=await imageSrc('staff:'+st.id),im=await loadCanvasImage(src);
+      let bx=72+(col%4)*365, by=cy+Math.floor(col/4)*150;
+      if(im)drawRoundImage(x,im,bx,by,92,92,46);
+      else{x.fillStyle='#e8eef5';x.beginPath();x.arc(bx+46,by+46,46,0,Math.PI*2);x.fill()}
+      x.fillStyle='#13233a';x.font='bold 22px sans-serif';x.fillText((person.leader?'หัวหน้า: ':'')+(st.nick||st.name),bx+108,by+34);
+      x.fillStyle='#66758a';x.font='18px sans-serif';drawWrapped(x,st.role||'',bx+108,by+62,235,24,2);
+      col++;
+    }
+    cy += Math.max(1,Math.ceil(people.length/4))*150;
+
+    x.fillStyle='#13233a';x.font='bold 22px sans-serif';x.fillText('เครื่องจักร',72,cy+5);cy+=28;
+    let mi=0;
+    for(let mid of (t.machines||[])){
+      let m=machBy(mid);if(!m)continue;
+      let pics=(await imgGet('machine:'+mid))||[], im=await loadCanvasImage(pics[0]||'');
+      let bx=72+(mi%3)*485, by=cy+Math.floor(mi/3)*170;
+      x.fillStyle='#f8fafc';x.beginPath();x.roundRect(bx,by,455,145,16);x.fill();x.strokeStyle='#d5dde7';x.lineWidth=2;x.stroke();
+      if(im)drawRoundImage(x,im,bx+12,by+12,135,120,14);
+      else{x.fillStyle='#e8eef5';x.fillRect(bx+12,by+12,135,120);x.fillStyle='#0b3b68';x.font='42px sans-serif';x.fillText('⚙',bx+58,by+82)}
+      x.fillStyle='#13233a';x.font='bold 21px sans-serif';drawWrapped(x,m.name||'',bx+165,by+48,270,27,2);
+      x.fillStyle='#66758a';x.font='17px sans-serif';x.fillText(m.code||m.type||'',bx+165,by+112);mi++;
+    }
+    cy += Math.max(1,Math.ceil((t.machines||[]).length/3))*170;
+
+    x.fillStyle='#eef3f8';x.beginPath();x.roundRect(72,cy,1455,115,14);x.fill();
+    x.fillStyle='#13233a';x.font='bold 22px sans-serif';x.fillText('รายละเอียดงาน',92,cy+32);
+    x.font='20px sans-serif';drawWrapped(x,t.plan||'-',92,cy+62,1400,26,2);
+    if(t.planMM){x.fillStyle='#66758a';x.font='17px sans-serif';drawWrapped(x,t.planMM,92,cy+92,1400,22,1)}
+    y=top+boxH+28;
+  }
+
+  if(absent.length){
+    x.fillStyle='#fff';x.beginPath();x.roundRect(45,y,1510,120,20);x.fill();x.strokeStyle='#d5dde7';x.stroke();
+    x.fillStyle='#13233a';x.font='bold 24px sans-serif';x.fillText(`หยุดงาน / ขาดงาน ${absent.length} คน`,72,y+38);
+    x.font='20px sans-serif';x.fillStyle='#66758a';drawWrapped(x,absent.map(st=>st.nick||st.name).join(' • '),72,y+72,1440,27,2);
+  }
+  return await new Promise(r=>canvas.toBlob(r,'image/png',.95));
+}
 function wrapText(ctx,text,x,y,max,w){let words=text.split(' '),line='';for(let word of words){let test=line+word+' ';if(ctx.measureText(test).width>max&&line){ctx.fillText(line,x,y);line=word+' ';y+=w}else line=test}ctx.fillText(line,x,y)}
 async function shareBlob(blob,name){let file=new File([blob],name,{type:'image/png'});if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){try{await navigator.share({files:[file],title:name});return}catch(e){if(e.name==='AbortError')return}}let a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
-async function exportPlan(){await shareBlob(await exportElement('plan'),'SFW&T-plan.png')}async function exportOrg(){await shareBlob(await exportElement('org'),'SFW&T-orgchart.png')}
-async function renderAll(){await renderStats();await renderStaff();await renderMachines();await renderTeams();loadPlanForm();await renderOrg();document.body.classList.toggle('hideMM',state.lang==='th')}
+async function exportPlan(){await shareBlob(await exportElement('plan'),`SFW&T-plan-${state.plan.date||'latest'}.png`)}async function exportOrg(){await shareBlob(await exportElement('org'),`SFW&T-orgchart-${state.plan.date||'latest'}.png`)}
+async function renderAll(){await renderStats();await renderStaff();await renderMachines();await renderTeams();loadPlanForm();renderHistory();await renderOrg();document.body.classList.toggle('hideMM',state.lang==='th')}
 window.addEventListener('pagehide',()=>{try{localStorage.setItem(STATE_KEY,JSON.stringify(state))}catch(e){}});renderAll();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
-</script><style>.hideMM .langMM{display:none!important}textarea[readonly],input[readonly]{background:#eef2f7;color:#526173} .zoneTitle{margin:12px 0 8px;padding:10px 14px;border-radius:12px;background:#eef2f7;color:#0b3b68;font-size:18px}.zoneTitle b{font-size:20px} </style></body></html>
+</script><style>.hideMM .langMM{display:none!important}textarea[readonly],input[readonly]{background:#eef2f7;color:#526173} .zoneTitle{margin:12px 0 8px;padding:10px 14px;border-radius:12px;background:#eef2f7;color:#0b3b68;font-size:18px}.zoneTitle b{font-size:20px} .attendanceWork{font-weight:800}.attendanceOff{font-weight:800}.historyDate{font-variant-numeric:tabular-nums}
+</style></body></html>
