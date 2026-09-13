@@ -12,7 +12,7 @@ label{font-size:12px;color:var(--muted);font-weight:700;display:block;margin:7px
 .modal{position:fixed;inset:0;background:#0008;z-index:50;display:none;align-items:flex-end}.modal.show{display:flex}.sheet{width:100%;background:#fff;border-radius:20px 20px 0 0;max-height:90vh;overflow:auto;padding:14px max(16px,env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}.sheetHead{position:sticky;top:-14px;background:#fff;z-index:2;padding:8px 0;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}.sheetHead h3{margin:0}.closeBtn{border:0;background:#eef3f8;color:var(--navy);border-radius:10px;padding:9px 12px;font-weight:900}.photoGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.photoTile{position:relative}.photoTile img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;border:1px solid var(--line)}.photoTile button{position:absolute;right:4px;top:4px;border:0;border-radius:8px;background:#0009;color:#fff}.langMM{font-size:11px;color:#728298;display:block;margin-top:1px}
 @media(max-width:760px){.cards{grid-template-columns:repeat(2,1fr)}.grid2,.grid3{grid-template-columns:1fr}.teamGrid{grid-template-columns:1fr}.brand h1{font-size:17px}.brand small{font-size:11px}.pageTitle h2{font-size:20px}.bottomNav{height:72px}.org{min-width:900px}}
 @media print{header,.bottomNav,.noPrint{display:none!important}main{padding:0}.page{display:none!important}.page#printPage{display:block!important}}
-</style><meta name="sfwt-version" content="v53-reference-layout-fast"></head><body>
+</style><meta name="sfwt-version" content="v54-clean-real-portraits"></head><body>
 <header><div class="brand"><img src="sft-logo.jpg"><div><h1>SFW&T บริหารทีมงาน</h1><small>บริษัท ศักวิเศษ เฟรม แอนด์ ทรัส จำกัด</small></div><div class="topActions"><button class="iconBtn" onclick="toggleLang()" id="langBtn">TH / မြန်မာ</button></div></div></header>
 <main>
 <section class="page active" id="dashboardPage"><div class="pageTitle"><h2>ภาพรวม <span class="langMM">အကျဉ်းချုပ်</span></h2><button class="btn navy" onclick="exportPlan()">🖼️ ส่งออกรูป</button></div><div class="cards" id="stats"></div><div class="panel"><h3>งานวันนี้ <span class="langMM">ယနေ့အလုပ်အစီအစဉ်</span></h3><div id="todaySummary"></div></div><div class="panel"><h3>ชุดทำงานทั้งหมด</h3><div id="dashboardTeams" class="teamGrid"></div></div></section>
@@ -144,6 +144,7 @@ try{
   localStorage.setItem('sfwt_backup_before_v51',JSON.stringify(state));
   localStorage.setItem('sfwt_backup_before_v52',JSON.stringify(state));
   localStorage.setItem('sfwt_backup_before_v53',JSON.stringify(state));
+  localStorage.setItem('sfwt_backup_before_v54',JSON.stringify(state));
   localStorage.setItem('sfwt_backup_latest',JSON.stringify(state));
 }catch(e){}
 
@@ -242,7 +243,7 @@ function deleteWorkTeam(id){
   if(!confirm('ลบชุดทำงาน '+id+' ?'))return;
   state.teams=state.teams.filter(t=>t.id!==id);saveHistorySnapshot();save();
 }
-async function imageSrc(key){let v=await imgGet(key);if(v)return v;if(key.startsWith('staff:')){let id=key.split(':')[1];return id+'.jpg?v=53'}return ''}
+async function imageSrc(key){let v=await imgGet(key);if(v)return v;if(key.startsWith('staff:')){let id=key.split(':')[1];return id+'.jpg?v=54'}return ''}
 function showPage(btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.navBtn').forEach(x=>x.classList.remove('active'));document.getElementById(btn.dataset.page).classList.add('active');btn.classList.add('active');scrollTo(0,0);if(btn.dataset.page==='orgPage')renderOrg()}
 function toggleLang(){state.lang=state.lang==='both'?'th':'both';document.body.classList.toggle('hideMM',state.lang==='th');save()}
 function openModal(title,html){document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').innerHTML=html;document.getElementById('editModal').classList.add('show');history.pushState({modal:true},'')}
@@ -297,7 +298,7 @@ async function teamCard(t,edit=false){
     let st=staffBy(id);if(!st)continue;
     let p=await imageSrc('staff:'+id);
     members.push(`<div class="crewPerson">
-      <div class="portraitWrap">${p?`<img loading="lazy" decoding="async" src="${p}">`:`<div class="portraitPlaceholder">${esc((st.nick||st.name).slice(0,1))}</div>`}<i></i></div>
+      <div class="portraitWrap">${p?`<img loading="lazy" decoding="async" src="${p}">`:`<div class="portraitPlaceholder">${esc((st.nick||st.name).slice(0,1))}</div>`}</div>
       <b>${esc(st.nick||st.name)}</b>
     </div>`);
   }
@@ -320,7 +321,7 @@ async function teamCard(t,edit=false){
       </div>
       <div class="crewRow">
         ${lead?`<div class="crewPerson leaderPerson">
-          <div class="portraitWrap leaderPortrait">${lp?`<img loading="lazy" decoding="async" src="${lp}">`:`<div class="portraitPlaceholder">${esc((lead.nick||lead.name).slice(0,1))}</div>`}<i></i></div>
+          <div class="portraitWrap leaderPortrait">${lp?`<img loading="lazy" decoding="async" src="${lp}">`:`<div class="portraitPlaceholder">${esc((lead.nick||lead.name).slice(0,1))}</div>`}</div>
           <b>${esc(lead.nick||'')} ${esc(lead.name)}</b>
           <small>Team Leader</small>
         </div>`:''}
@@ -740,11 +741,7 @@ window.addEventListener('pagehide',()=>{try{localStorage.setItem(STATE_KEY,JSON.
 .leaderPortrait{width:104px;height:104px}
 .portraitWrap img{width:100%;height:100%;object-fit:cover;object-position:center 34%;display:block}
 .portraitPlaceholder{width:100%;height:100%;display:grid;place-items:center;font-weight:800;color:#0b3b68}
-.portraitWrap i{
-  position:absolute;right:-3px;bottom:-3px;width:29px;height:29px;border-radius:50%;
-  background:#fff;display:block;z-index:3;
-}
-.leaderPortrait i{width:34px;height:34px}
+
 .machineVisualGrid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:6px;
 }
@@ -777,5 +774,16 @@ window.addEventListener('pagehide',()=>{try{localStorage.setItem(STATE_KEY,JSON.
   .machineVisual small{font-size:9px}
   .refTask b{font-size:15px}
 }
+
+
+/* v54: real staff portraits only — no badge, no overlay */
+.portraitWrap img,
+.personCard .avatar,
+.orgLeader img,
+.orgMember img{
+  object-fit:cover!important;
+  object-position:center center!important;
+}
+.portraitWrap{background:#fff!important}
 
 </style></body></html>
