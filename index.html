@@ -12,7 +12,7 @@ label{font-size:12px;color:var(--muted);font-weight:700;display:block;margin:7px
 .modal{position:fixed;inset:0;background:#0008;z-index:50;display:none;align-items:flex-end}.modal.show{display:flex}.sheet{width:100%;background:#fff;border-radius:20px 20px 0 0;max-height:90vh;overflow:auto;padding:14px max(16px,env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}.sheetHead{position:sticky;top:-14px;background:#fff;z-index:2;padding:8px 0;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}.sheetHead h3{margin:0}.closeBtn{border:0;background:#eef3f8;color:var(--navy);border-radius:10px;padding:9px 12px;font-weight:900}.photoGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.photoTile{position:relative}.photoTile img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;border:1px solid var(--line)}.photoTile button{position:absolute;right:4px;top:4px;border:0;border-radius:8px;background:#0009;color:#fff}.langMM{font-size:11px;color:#728298;display:block;margin-top:1px}
 @media(max-width:760px){.cards{grid-template-columns:repeat(2,1fr)}.grid2,.grid3{grid-template-columns:1fr}.teamGrid{grid-template-columns:1fr}.brand h1{font-size:17px}.brand small{font-size:11px}.pageTitle h2{font-size:20px}.bottomNav{height:72px}.org{min-width:900px}}
 @media print{header,.bottomNav,.noPrint{display:none!important}main{padding:0}.page{display:none!important}.page#printPage{display:block!important}}
-</style><meta name="sfwt-version" content="v51-big-team-frames"></head><body>
+</style><meta name="sfwt-version" content="v52-clean-sharp-fast"></head><body>
 <header><div class="brand"><img src="sft-logo.jpg"><div><h1>SFW&T บริหารทีมงาน</h1><small>บริษัท ศักวิเศษ เฟรม แอนด์ ทรัส จำกัด</small></div><div class="topActions"><button class="iconBtn" onclick="toggleLang()" id="langBtn">TH / မြန်မာ</button></div></div></header>
 <main>
 <section class="page active" id="dashboardPage"><div class="pageTitle"><h2>ภาพรวม <span class="langMM">အကျဉ်းချုပ်</span></h2><button class="btn navy" onclick="exportPlan()">🖼️ ส่งออกรูป</button></div><div class="cards" id="stats"></div><div class="panel"><h3>งานวันนี้ <span class="langMM">ယနေ့အလုပ်အစီအစဉ်</span></h3><div id="todaySummary"></div></div><div class="panel"><h3>ชุดทำงานทั้งหมด</h3><div id="dashboardTeams" class="teamGrid"></div></div></section>
@@ -142,6 +142,7 @@ preserveDataBeforeV49();
 try{
   localStorage.setItem('sfwt_backup_before_v50',JSON.stringify(state));
   localStorage.setItem('sfwt_backup_before_v51',JSON.stringify(state));
+  localStorage.setItem('sfwt_backup_before_v52',JSON.stringify(state));
   localStorage.setItem('sfwt_backup_latest',JSON.stringify(state));
 }catch(e){}
 
@@ -240,7 +241,7 @@ function deleteWorkTeam(id){
   if(!confirm('ลบชุดทำงาน '+id+' ?'))return;
   state.teams=state.teams.filter(t=>t.id!==id);saveHistorySnapshot();save();
 }
-async function imageSrc(key){let v=await imgGet(key);if(v)return v;if(key.startsWith('staff:')){let id=key.split(':')[1];return id+'.jpg'}return ''}
+async function imageSrc(key){let v=await imgGet(key);if(v)return v;if(key.startsWith('staff:')){let id=key.split(':')[1];return id+'.jpg?v=52'}return ''}
 function showPage(btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.navBtn').forEach(x=>x.classList.remove('active'));document.getElementById(btn.dataset.page).classList.add('active');btn.classList.add('active');scrollTo(0,0);if(btn.dataset.page==='orgPage')renderOrg()}
 function toggleLang(){state.lang=state.lang==='both'?'th':'both';document.body.classList.toggle('hideMM',state.lang==='th');save()}
 function openModal(title,html){document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').innerHTML=html;document.getElementById('editModal').classList.add('show');history.pushState({modal:true},'')}
@@ -265,7 +266,7 @@ async function saveStaffEditor(id,exists){let role=document.getElementById('eRol
 function deleteStaff(id){if(!confirm('ลบพนักงานคนนี้?'))return;state.staff=state.staff.filter(x=>x.id!==id);state.teams.forEach(t=>{if(t.leader===id)t.leader='';t.members=t.members.filter(x=>x!==id)});imgDel('staff:'+id);closeModal();save()}
 async function machineCard(m){let pics=(await imgGet('machine:'+m.id))||[],p=pics[0]||'';return `<div class=machineCard>${p?`<img class=thumb src="${p}">`:`<div class="thumb placeholder">🏗️</div>`}<div class=grow><b>${esc(m.name)}</b><small>${esc(m.type)} • ${esc(m.code||'')}</small><span class=langMM>${esc(m.nameMM||'')}</span><small>${pics.length} รูป</small></div><button class=btn onclick="pickMachinePhotos('${m.id}')">📷+</button><button class=btn onclick="openMachineEditor('${m.id}')">✏️</button></div>`}
 async function renderMachines(){let a=[];for(let m of state.machines)a.push(await machineCard(m));document.getElementById('machineList').innerHTML=a.join('')}
-async function openMachineEditor(id=''){let m=id?machBy(id):{id:nextId('m',state.machines),name:'',nameMM:'',type:'',code:'',note:''},pics=id?(await imgGet('machine:'+id)||[]):[];openModal(id?'แก้ไขเครื่องจักร':'เพิ่มเครื่องจักร',`<div class=grid2><div><label>ชื่อเครื่องจักร (แก้ไขภาษาไทย)</label><input id=mName value="${esc(m.name)}" oninput="autoTranslate('mName','mNameMM')"></div><div><label>รหัส/หมายเลข</label><input id=mCode value="${esc(m.code||'')}"></div></div><label>ชื่อภาษาพม่า (แปลอัตโนมัติ)</label><input id=mNameMM readonly value="${esc(m.nameMM||'')}"><label>ประเภท</label><input id=mType value="${esc(m.type||'')}"><label>รายละเอียด/หมายเหตุ</label><textarea id=mNote>${esc(m.note||'')}</textarea><div class=photoGrid>${pics.map((p,i)=>`<div class=photoTile><img src="${p}"><button onclick="removeMachinePhoto('${m.id}',${i})">✕</button></div>`).join('')}</div><div class="row wrap" style="margin-top:12px"><button class="btn navy" onclick="saveMachineEditor('${m.id}',${id?'true':'false'})">💾 บันทึก</button><button class=btn onclick="pickMachinePhotos('${m.id}')">📷 เพิ่มรูปหลายรูป</button>${id?`<button class="btn danger" onclick="deleteMachine('${m.id}')">ลบเครื่องจักร</button>`:''}</div>`)}
+async function openMachineEditor(id=''){let m=id?machBy(id):{id:nextId('m',state.machines),name:'',nameMM:'',type:'',code:'',note:''},pics=id?(await imgGet('machine:'+id)||[]):[];openModal(id?'แก้ไขเครื่องจักร':'เพิ่มเครื่องจักร',`<div class=grid2><div><label>ชื่อเครื่องจักร (แก้ไขภาษาไทย)</label><input id=mName value="${esc(m.name)}" oninput="autoTranslate('mName','mNameMM')"></div><div><label>รหัส/หมายเลข</label><input id=mCode value="${esc(m.code||'')}"></div></div><label>ชื่อภาษาพม่า (แปลอัตโนมัติ)</label><input id=mNameMM readonly value="${esc(m.nameMM||'')}"><label>ประเภท</label><input id=mType value="${esc(m.type||'')}"><label>รายละเอียด/หมายเหตุ</label><textarea id=mNote>${esc(m.note||'')}</textarea><div class=photoGrid>${pics.map((p,i)=>`<div class=photoTile><img loading="lazy" decoding="async" src="${p}"><button onclick="removeMachinePhoto('${m.id}',${i})">✕</button></div>`).join('')}</div><div class="row wrap" style="margin-top:12px"><button class="btn navy" onclick="saveMachineEditor('${m.id}',${id?'true':'false'})">💾 บันทึก</button><button class=btn onclick="pickMachinePhotos('${m.id}')">📷 เพิ่มรูปหลายรูป</button>${id?`<button class="btn danger" onclick="deleteMachine('${m.id}')">ลบเครื่องจักร</button>`:''}</div>`)}
 async function saveMachineEditor(id,exists){let name=document.getElementById('mName').value.trim();let o={id,name,nameMM:await translateTH(name),type:document.getElementById('mType').value.trim(),code:document.getElementById('mCode').value.trim(),note:document.getElementById('mNote').value.trim()};if(!o.name)return alert('กรุณาใส่ชื่อเครื่องจักร');if(exists)Object.assign(machBy(id),o);else state.machines.push(o);closeModal();save()}
 async function removeMachinePhoto(id,i){let pics=(await imgGet('machine:'+id))||[];pics.splice(i,1);await imgSet('machine:'+id,pics);openMachineEditor(id);renderAll()}
 function deleteMachine(id){if(!confirm('ลบเครื่องจักรนี้?'))return;state.machines=state.machines.filter(x=>x.id!==id);state.teams.forEach(t=>t.machines=t.machines.filter(x=>x!==id));imgDel('machine:'+id);closeModal();save()}
@@ -288,7 +289,7 @@ async function saveTeamEditor(id){
   t.name=document.getElementById('tName').value.trim();t.zone='';t.leader=leader;t.members=members;t.machines=machines;
   t.plan=document.getElementById('tPlan').value;t.planMM=await translateTH(t.plan);saveHistorySnapshot();closeModal();save()
 }
-async function teamCard(t,edit=false){let lead=staffBy(t.leader),lp=lead?await imageSrc('staff:'+lead.id):'',people=[];for(let id of t.members){let s=staffBy(id);if(!s)continue;let p=await imageSrc('staff:'+id);people.push(`<div class=chip>${p?`<img src="${p}">`:`<span>👷</span>`}${esc(s.nick||s.name)}</div>`)}let ms=[];for(let id of t.machines){let m=machBy(id);if(!m)continue;let pics=(await imgGet('machine:'+id))||[];ms.push(`<div class=machMini>${pics[0]?`<img src="${pics[0]}">`:`<div class="thumb placeholder">🏗️</div>`}<div class=grow><b>${esc(m.name)}</b><span class=langMM>${esc(m.nameMM||'')}</span></div></div>`)}return `<div class="teamCard"><div class=teamHead><div><div class="teamDate">📅 วันที่ ${esc(thaiWorkDate(state.plan.date))}</div><h3 style="margin:8px 0 5px">${esc(t.name)}</h3><div class=muted>${lead?`หัวหน้า: ${esc(lead.nick||lead.name)} / ${esc(lead.name)}`:'ยังไม่เลือกหัวหน้า'}</div></div>${edit?`<button class=btn onclick="openTeamEditor('${t.id}')">✏️ ปรับทีม</button>`:''}</div>${lead?`<div class=personCard style="margin-top:8px">${lp?`<img class=avatar src="${lp}">`:`<div class="avatar placeholder">${esc((lead.nick||lead.name).slice(0,2))}</div>`}<div class=grow><b>${esc(lead.nick||'')} ${esc(lead.name)}</b><small>${esc(lead.role)}</small><span class=langMM>${esc(lead.roleMM||'')}</span></div></div>`:''}<div class=teamPeople>${people.join('')||'<span class=muted>ยังไม่มีลูกทีม</span>'}</div><div class=machList>${ms.join('')||'<span class=muted>ยังไม่มีเครื่องจักร</span>'}</div><div class=planBox><b>งาน:</b> ${esc(exportText(t.plan||'-'))}<span class=langMM>${esc(t.planMM||'')}</span></div></div>`}
+async function teamCard(t,edit=false){let lead=staffBy(t.leader),lp=lead?await imageSrc('staff:'+lead.id):'',people=[];for(let id of t.members){let s=staffBy(id);if(!s)continue;let p=await imageSrc('staff:'+id);people.push(`<div class=chip>${p?`<img loading="lazy" decoding="async" src="${p}">`:`<span>👷</span>`}${esc(s.nick||s.name)}</div>`)}let ms=[];for(let id of t.machines){let m=machBy(id);if(!m)continue;let pics=(await imgGet('machine:'+id))||[];ms.push(`<div class=machMini>${pics[0]?`<img loading="lazy" decoding="async" src="${pics[0]}">`:`<div class="thumb placeholder">🏗️</div>`}<div class=grow><b>${esc(m.name)}</b><span class=langMM>${esc(m.nameMM||'')}</span></div></div>`)}return `<div class="teamCard"><div class=teamHead><div><div class="teamDate">📅 วันที่ ${esc(thaiWorkDate(state.plan.date))}</div><h3 style="margin:8px 0 5px">${esc(t.name)}</h3><div class=muted>${lead?`หัวหน้า: ${esc(lead.nick||lead.name)} / ${esc(lead.name)}`:'ยังไม่เลือกหัวหน้า'}</div></div>${edit?`<button class=btn onclick="openTeamEditor('${t.id}')">✏️ ปรับทีม</button>`:''}</div>${lead?`<div class=personCard style="margin-top:8px">${lp?`<img class=avatar loading="lazy" decoding="async" src="${lp}">`:`<div class="avatar placeholder">${esc((lead.nick||lead.name).slice(0,2))}</div>`}<div class=grow><b>${esc(lead.nick||'')} ${esc(lead.name)}</b><small>${esc(lead.role)}</small><span class=langMM>${esc(lead.roleMM||'')}</span></div></div>`:''}<div class=teamPeople>${people.join('')||'<span class=muted>ยังไม่มีลูกทีม</span>'}</div><div class=machList>${ms.join('')||'<span class=muted>ยังไม่มีเครื่องจักร</span>'}</div><div class=planBox><b>งาน:</b> ${esc(exportText(t.plan||'-'))}<span class=langMM>${esc(t.planMM||'')}</span></div></div>`}
 async function renderTeams(){
   let e=[];for(let t of orderedTeams())e.push(await teamCard(t,true));
   document.getElementById('teamEditorGrid').innerHTML=e.join('');
@@ -329,7 +330,7 @@ async function renderOrg(){
     for(let id of (t.machines||[])){
       let m=machBy(id); if(!m)continue;
       let pics=(await imgGet('machine:'+id))||[];
-      mach.push(`<div class=orgMember>${pics[0]?`<img src="${pics[0]}">`:`<div class="avatar placeholder" style="width:36px;height:36px">⚙️</div>`}<div><b>${esc(m.name)}</b><small>${esc(exportText(m.code||m.type||''))}</small></div></div>`);
+      mach.push(`<div class=orgMember>${pics[0]?`<img loading="lazy" decoding="async" src="${pics[0]}">`:`<div class="avatar placeholder" style="width:36px;height:36px">⚙️</div>`}<div><b>${esc(m.name)}</b><small>${esc(exportText(m.code||m.type||''))}</small></div></div>`);
     }
     cards.push(`<div class=orgTeam>
       <div class=orgLeader>${lp?`<img src="${lp}">`:`<div class="avatar placeholder" style="width:58px;height:58px">${l?esc((l.nick||l.name).slice(0,2)):'?'}</div>`}
@@ -573,9 +574,6 @@ window.addEventListener('pagehide',()=>{try{localStorage.setItem(STATE_KEY,JSON.
 .orgTeam>*{position:relative;z-index:1}
 .teamCard img,.orgTeam img,.personCard img,.machMini img,.orgMember img{
   image-rendering:auto;
-  -webkit-transform:translateZ(0);
-  transform:translateZ(0);
-  backface-visibility:hidden;
 }
 .teamGrid{content-visibility:auto;contain-intrinsic-size:1200px}
 .teamCard{contain:layout paint style}
@@ -634,5 +632,31 @@ window.addEventListener('pagehide',()=>{try{localStorage.setItem(STATE_KEY,JSON.
 .teamCard .muted{
   font-size:12px !important;
 }
+
+
+/* v52: cleaner, larger staff photos and smoother scrolling */
+.teamCard .avatar,
+.teamCard .teamPeople .chip img{
+  object-fit:cover !important;
+  object-position:center 34% !important;
+  clip-path:circle(49% at 50% 50%);
+}
+.teamCard .personCard .avatar{
+  width:112px !important;
+  height:112px !important;
+}
+.teamCard .teamPeople .chip img{
+  width:78px !important;
+  height:78px !important;
+}
+.teamCard .personCard b{font-size:18px!important}
+.teamCard .teamPeople .chip{font-size:14px!important}
+.teamCard .machMini img,.teamCard .machMini .thumb{
+  width:158px!important;
+  height:112px!important;
+}
+.teamCard .machMini b{font-size:14px!important}
+.teamCard .machMini span{font-size:11px!important}
+#dashboardTeams .teamCard{content-visibility:auto;contain-intrinsic-size:900px}
 
 </style></body></html>
