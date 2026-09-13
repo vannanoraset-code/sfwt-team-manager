@@ -12,7 +12,7 @@ label{font-size:12px;color:var(--muted);font-weight:700;display:block;margin:7px
 .modal{position:fixed;inset:0;background:#0008;z-index:50;display:none;align-items:flex-end}.modal.show{display:flex}.sheet{width:100%;background:#fff;border-radius:20px 20px 0 0;max-height:90vh;overflow:auto;padding:14px max(16px,env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}.sheetHead{position:sticky;top:-14px;background:#fff;z-index:2;padding:8px 0;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}.sheetHead h3{margin:0}.closeBtn{border:0;background:#eef3f8;color:var(--navy);border-radius:10px;padding:9px 12px;font-weight:900}.photoGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.photoTile{position:relative}.photoTile img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;border:1px solid var(--line)}.photoTile button{position:absolute;right:4px;top:4px;border:0;border-radius:8px;background:#0009;color:#fff}.langMM{font-size:11px;color:#728298;display:block;margin-top:1px}
 @media(max-width:760px){.cards{grid-template-columns:repeat(2,1fr)}.grid2,.grid3{grid-template-columns:1fr}.teamGrid{grid-template-columns:1fr}.brand h1{font-size:17px}.brand small{font-size:11px}.pageTitle h2{font-size:20px}.bottomNav{height:72px}.org{min-width:900px}}
 @media print{header,.bottomNav,.noPrint{display:none!important}main{padding:0}.page{display:none!important}.page#printPage{display:block!important}}
-</style><meta name="sfwt-version" content="v50-watermark-sharp-fast"></head><body>
+</style><meta name="sfwt-version" content="v51-big-team-frames"></head><body>
 <header><div class="brand"><img src="sft-logo.jpg"><div><h1>SFW&T บริหารทีมงาน</h1><small>บริษัท ศักวิเศษ เฟรม แอนด์ ทรัส จำกัด</small></div><div class="topActions"><button class="iconBtn" onclick="toggleLang()" id="langBtn">TH / မြန်မာ</button></div></div></header>
 <main>
 <section class="page active" id="dashboardPage"><div class="pageTitle"><h2>ภาพรวม <span class="langMM">အကျဉ်းချုပ်</span></h2><button class="btn navy" onclick="exportPlan()">🖼️ ส่งออกรูป</button></div><div class="cards" id="stats"></div><div class="panel"><h3>งานวันนี้ <span class="langMM">ယနေ့အလုပ်အစီအစဉ်</span></h3><div id="todaySummary"></div></div><div class="panel"><h3>ชุดทำงานทั้งหมด</h3><div id="dashboardTeams" class="teamGrid"></div></div></section>
@@ -141,6 +141,7 @@ function preserveDataBeforeV49(){
 preserveDataBeforeV49();
 try{
   localStorage.setItem('sfwt_backup_before_v50',JSON.stringify(state));
+  localStorage.setItem('sfwt_backup_before_v51',JSON.stringify(state));
   localStorage.setItem('sfwt_backup_latest',JSON.stringify(state));
 }catch(e){}
 
@@ -410,7 +411,7 @@ async function exportElement(kind){
     let t=teams[i],boxH=teamHeights[i],top=y;
     x.fillStyle='#fff';x.beginPath();x.roundRect(35,top,1530,boxH,22);x.fill();
     await drawExportWatermark(x,35,top,1530,boxH,.04);
-    x.strokeStyle='#0b3b68';x.lineWidth=3;x.stroke();
+    x.strokeStyle='#0b4c7d';x.lineWidth=5;x.stroke();
 
     x.fillStyle='#eef3f8';x.beginPath();x.arc(78,top+44,28,0,Math.PI*2);x.fill();
     x.fillStyle='#0b3b68';x.font=`700 25px ${FONT}`;x.textAlign='center';x.fillText(t.id,78,top+52);x.textAlign='start';
@@ -578,5 +579,60 @@ window.addEventListener('pagehide',()=>{try{localStorage.setItem(STATE_KEY,JSON.
 }
 .teamGrid{content-visibility:auto;contain-intrinsic-size:1200px}
 .teamCard{contain:layout paint style}
+
+
+/* v51: large frame separating each work set */
+.teamCard{
+  border:3px solid #0b4c7d !important;
+  border-radius:22px !important;
+  padding:16px !important;
+  margin-bottom:22px !important;
+  background:rgba(255,255,255,.94) !important;
+  box-shadow:0 2px 8px rgba(11,76,125,.08);
+}
+.teamCard .personCard,
+.teamCard .machMini,
+.teamCard .planBox{
+  border:none !important;
+  box-shadow:none !important;
+}
+.teamCard .personCard{
+  background:transparent !important;
+}
+.teamCard .machMini{
+  background:transparent !important;
+}
+.teamCard .planBox{
+  background:#f3f6f9 !important;
+  border-radius:14px !important;
+}
+.teamCard .teamPeople .chip{
+  border:none !important;
+  background:transparent !important;
+  box-shadow:none !important;
+}
+.teamCard .teamPeople .chip img{
+  width:68px !important;
+  height:68px !important;
+}
+.teamCard .personCard .avatar{
+  width:96px !important;
+  height:96px !important;
+}
+.teamCard .machMini img,
+.teamCard .machMini .thumb{
+  width:142px !important;
+  height:104px !important;
+  object-fit:cover !important;
+  border-radius:12px !important;
+}
+.teamCard .machMini b{
+  font-size:15px !important;
+}
+.teamCard .machMini span,
+.teamCard .personCard small,
+.teamCard .muted{
+  font-size:12px !important;
+}
 
 </style></body></html>
