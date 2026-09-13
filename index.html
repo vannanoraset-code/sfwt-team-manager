@@ -12,7 +12,7 @@ label{font-size:12px;color:var(--muted);font-weight:700;display:block;margin:7px
 .modal{position:fixed;inset:0;background:#0008;z-index:50;display:none;align-items:flex-end}.modal.show{display:flex}.sheet{width:100%;background:#fff;border-radius:20px 20px 0 0;max-height:90vh;overflow:auto;padding:14px max(16px,env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}.sheetHead{position:sticky;top:-14px;background:#fff;z-index:2;padding:8px 0;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}.sheetHead h3{margin:0}.closeBtn{border:0;background:#eef3f8;color:var(--navy);border-radius:10px;padding:9px 12px;font-weight:900}.photoGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.photoTile{position:relative}.photoTile img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;border:1px solid var(--line)}.photoTile button{position:absolute;right:4px;top:4px;border:0;border-radius:8px;background:#0009;color:#fff}.langMM{font-size:11px;color:#728298;display:block;margin-top:1px}
 @media(max-width:760px){.cards{grid-template-columns:repeat(2,1fr)}.grid2,.grid3{grid-template-columns:1fr}.teamGrid{grid-template-columns:1fr}.brand h1{font-size:17px}.brand small{font-size:11px}.pageTitle h2{font-size:20px}.bottomNav{height:72px}.org{min-width:900px}}
 @media print{header,.bottomNav,.noPrint{display:none!important}main{padding:0}.page{display:none!important}.page#printPage{display:block!important}}
-</style><meta name="sfwt-version" content="v49-date-header-safe-data"></head><body>
+</style><meta name="sfwt-version" content="v50-watermark-sharp-fast"></head><body>
 <header><div class="brand"><img src="sft-logo.jpg"><div><h1>SFW&T บริหารทีมงาน</h1><small>บริษัท ศักวิเศษ เฟรม แอนด์ ทรัส จำกัด</small></div><div class="topActions"><button class="iconBtn" onclick="toggleLang()" id="langBtn">TH / မြန်မာ</button></div></div></header>
 <main>
 <section class="page active" id="dashboardPage"><div class="pageTitle"><h2>ภาพรวม <span class="langMM">အကျဉ်းချုပ်</span></h2><button class="btn navy" onclick="exportPlan()">🖼️ ส่งออกรูป</button></div><div class="cards" id="stats"></div><div class="panel"><h3>งานวันนี้ <span class="langMM">ယနေ့အလုပ်အစီအစဉ်</span></h3><div id="todaySummary"></div></div><div class="panel"><h3>ชุดทำงานทั้งหมด</h3><div id="dashboardTeams" class="teamGrid"></div></div></section>
@@ -139,6 +139,11 @@ function preserveDataBeforeV49(){
   }catch(e){}
 }
 preserveDataBeforeV49();
+try{
+  localStorage.setItem('sfwt_backup_before_v50',JSON.stringify(state));
+  localStorage.setItem('sfwt_backup_latest',JSON.stringify(state));
+}catch(e){}
+
 
 state.history ||= [];
 state.tools ||= []; state.toolIssues ||= [];
@@ -350,6 +355,20 @@ function loadCanvasImage(src){
     let im=new Image(); im.onload=()=>resolve(im); im.onerror=()=>resolve(null); im.src=src;
   });
 }
+
+async function drawExportWatermark(ctx,x,y,w,h,opacity=.045){
+  try{
+    let logo=await loadCanvasImage('sft-logo.jpg');
+    if(!logo)return;
+    ctx.save();
+    ctx.globalAlpha=opacity;
+    let maxW=w*.55,maxH=h*.55,ratio=logo.width/logo.height;
+    let dw=maxW,dh=dw/ratio;
+    if(dh>maxH){dh=maxH;dw=dh*ratio}
+    ctx.drawImage(logo,x+(w-dw)/2,y+(h-dh)/2,dw,dh);
+    ctx.restore();
+  }catch(e){}
+}
 function drawRoundImage(ctx,img,x,y,w,h,r=18){
   if(!img)return;
   ctx.save();ctx.beginPath();
@@ -390,6 +409,7 @@ async function exportElement(kind){
   for(let i=0;i<teams.length;i++){
     let t=teams[i],boxH=teamHeights[i],top=y;
     x.fillStyle='#fff';x.beginPath();x.roundRect(35,top,1530,boxH,22);x.fill();
+    await drawExportWatermark(x,35,top,1530,boxH,.04);
     x.strokeStyle='#0b3b68';x.lineWidth=3;x.stroke();
 
     x.fillStyle='#eef3f8';x.beginPath();x.arc(78,top+44,28,0,Math.PI*2);x.fill();
@@ -479,7 +499,9 @@ async function exportOrgChartImage(){
       g.beginPath();g.moveTo(cc,rowTop);g.lineTo(cc,rowTop+28);g.stroke();
 
       let by=rowTop+28;
-      g.fillStyle='#fff';g.beginPath();g.roundRect(x0,by,cardW,h,20);g.fill();g.strokeStyle='#0b3b68';g.lineWidth=3;g.stroke();
+      g.fillStyle='#fff';g.beginPath();g.roundRect(x0,by,cardW,h,20);g.fill();
+      await drawExportWatermark(g,x0,by,cardW,h,.04);
+      g.strokeStyle='#0b3b68';g.lineWidth=3;g.stroke();
       g.fillStyle='#0b3b68';g.font=`700 18px ${FONT}`;g.fillText('วันที่ '+thaiWorkDate(state.plan.date),x0+22,by+28);
       g.fillStyle='#13233a';g.font=`700 23px ${FONT}`;g.fillText(exportText(t.name||('ชุดทำงาน '+t.id)),x0+22,by+58);
 
@@ -534,4 +556,27 @@ async function renderAll(){await renderStats();await renderStaff();await renderM
 window.addEventListener('pagehide',()=>{try{localStorage.setItem(STATE_KEY,JSON.stringify(state))}catch(e){}});renderAll();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script><style>.hideMM .langMM{display:none!important}textarea[readonly],input[readonly]{background:#eef2f7;color:#526173} .zoneTitle{margin:12px 0 8px;padding:10px 14px;border-radius:12px;background:#eef2f7;color:#0b3b68;font-size:18px}.zoneTitle b{font-size:20px} .attendanceWork{font-weight:800}.attendanceOff{font-weight:800}.historyDate{font-variant-numeric:tabular-nums}
 .teamDate{display:inline-flex;align-items:center;gap:5px;background:#eef3f8;color:#0b3b68;font-weight:800;border-radius:10px;padding:7px 10px;font-size:14px}
+
+/* v50 visual polish: faint company watermark + crisp media, no extra JS work */
+.teamCard,.orgTeam{position:relative;overflow:hidden;isolation:isolate}
+.teamCard::before,.orgTeam::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:url('sft-logo.jpg') center center/58% auto no-repeat;
+  opacity:.045;
+  pointer-events:none;
+  z-index:0;
+}
+.teamCard>*,
+.orgTeam>*{position:relative;z-index:1}
+.teamCard img,.orgTeam img,.personCard img,.machMini img,.orgMember img{
+  image-rendering:auto;
+  -webkit-transform:translateZ(0);
+  transform:translateZ(0);
+  backface-visibility:hidden;
+}
+.teamGrid{content-visibility:auto;contain-intrinsic-size:1200px}
+.teamCard{contain:layout paint style}
+
 </style></body></html>
