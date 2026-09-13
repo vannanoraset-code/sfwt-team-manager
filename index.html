@@ -12,11 +12,11 @@ label{font-size:12px;color:var(--muted);font-weight:700;display:block;margin:7px
 .modal{position:fixed;inset:0;background:#0008;z-index:50;display:none;align-items:flex-end}.modal.show{display:flex}.sheet{width:100%;background:#fff;border-radius:20px 20px 0 0;max-height:90vh;overflow:auto;padding:14px max(16px,env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}.sheetHead{position:sticky;top:-14px;background:#fff;z-index:2;padding:8px 0;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}.sheetHead h3{margin:0}.closeBtn{border:0;background:#eef3f8;color:var(--navy);border-radius:10px;padding:9px 12px;font-weight:900}.photoGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.photoTile{position:relative}.photoTile img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;border:1px solid var(--line)}.photoTile button{position:absolute;right:4px;top:4px;border:0;border-radius:8px;background:#0009;color:#fff}.langMM{font-size:11px;color:#728298;display:block;margin-top:1px}
 @media(max-width:760px){.cards{grid-template-columns:repeat(2,1fr)}.grid2,.grid3{grid-template-columns:1fr}.teamGrid{grid-template-columns:1fr}.brand h1{font-size:17px}.brand small{font-size:11px}.pageTitle h2{font-size:20px}.bottomNav{height:72px}.org{min-width:900px}}
 @media print{header,.bottomNav,.noPrint{display:none!important}main{padding:0}.page{display:none!important}.page#printPage{display:block!important}}
-</style><meta name="sfwt-version" content="v54-clean-real-portraits"></head><body>
+</style><meta name="sfwt-version" content="v56-app-first-photos-later"></head><body>
 <header><div class="brand"><img src="sft-logo.jpg"><div><h1>SFW&T บริหารทีมงาน</h1><small>บริษัท ศักวิเศษ เฟรม แอนด์ ทรัส จำกัด</small></div><div class="topActions"><button class="iconBtn" onclick="toggleLang()" id="langBtn">TH / မြန်မာ</button></div></div></header>
 <main>
 <section class="page active" id="dashboardPage"><div class="pageTitle"><h2>ภาพรวม <span class="langMM">အကျဉ်းချုပ်</span></h2><button class="btn navy" onclick="exportPlan()">🖼️ ส่งออกรูป</button></div><div class="cards" id="stats"></div><div class="panel"><h3>งานวันนี้ <span class="langMM">ယနေ့အလုပ်အစီအစဉ်</span></h3><div id="todaySummary"></div></div><div class="panel"><h3>ชุดทำงานทั้งหมด</h3><div id="dashboardTeams" class="teamGrid"></div></div></section>
-<section class="page" id="staffPage"><div class="pageTitle"><h2>พนักงาน <span class="langMM">ဝန်ထမ်း</span></h2><button class="btn red" onclick="openStaffEditor()">＋ เพิ่มพนักงาน</button></div><div class="panel"><input id="staffSearch" placeholder="ค้นหาชื่อ / ตำแหน่ง" oninput="renderStaff()"></div><div id="staffList" class="list"></div></section>
+<section class="page" id="staffPage"><div class="pageTitle"><h2>พนักงาน <span class="langMM">ဝန်ထမ်း</span></h2><button class="btn red" onclick="openStaffEditor()">＋ เพิ่มพนักงาน</button></div><div class="panel"><div class="muted" style="margin-bottom:8px">📷 รูปพนักงานสามารถอัปโหลดทีหลังได้จากปุ่มกล้องในแต่ละคน ข้อมูลทีมจะไม่หาย</div><input id="staffSearch" placeholder="ค้นหาชื่อ / ตำแหน่ง" oninput="renderStaff()"></div><div id="staffList" class="list"></div></section>
 <section class="page" id="machinePage"><div class="pageTitle"><h2>เครื่องจักร <span class="langMM">စက်ယန္တရား</span></h2><button class="btn red" onclick="openMachineEditor()">＋ เพิ่มเครื่องจักร</button></div><div id="machineList" class="list"></div></section>
 <section class="page" id="teamsPage">
 <div class="pageTitle"><h2>จัดชุดทำงาน <span class="langMM">အဖွဲ့စီမံခြင်း</span></h2><button class="btn navy" onclick="exportPlan()">🖼️ ส่งออกรูป</button></div>
@@ -145,6 +145,8 @@ try{
   localStorage.setItem('sfwt_backup_before_v52',JSON.stringify(state));
   localStorage.setItem('sfwt_backup_before_v53',JSON.stringify(state));
   localStorage.setItem('sfwt_backup_before_v54',JSON.stringify(state));
+  localStorage.setItem('sfwt_backup_before_v55',JSON.stringify(state));
+  localStorage.setItem('sfwt_backup_before_v56',JSON.stringify(state));
   localStorage.setItem('sfwt_backup_latest',JSON.stringify(state));
 }catch(e){}
 
@@ -243,7 +245,16 @@ function deleteWorkTeam(id){
   if(!confirm('ลบชุดทำงาน '+id+' ?'))return;
   state.teams=state.teams.filter(t=>t.id!==id);saveHistorySnapshot();save();
 }
-async function imageSrc(key){let v=await imgGet(key);if(v)return v;if(key.startsWith('staff:')){let id=key.split(':')[1];return id+'.jpg?v=54'}return ''}
+async function imageSrc(key){
+  if(key.startsWith('staff:')){
+    let id=key.split(':')[1];
+    let fresh=await imgGet('staffv55:'+id);
+    if(fresh)return fresh;
+    return '';
+  }
+  let v=await imgGet(key);if(v)return v;
+  return '';
+}
 function showPage(btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.navBtn').forEach(x=>x.classList.remove('active'));document.getElementById(btn.dataset.page).classList.add('active');btn.classList.add('active');scrollTo(0,0);if(btn.dataset.page==='orgPage')renderOrg()}
 function toggleLang(){state.lang=state.lang==='both'?'th':'both';document.body.classList.toggle('hideMM',state.lang==='th');save()}
 function openModal(title,html){document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').innerHTML=html;document.getElementById('editModal').classList.add('show');history.pushState({modal:true},'')}
@@ -254,7 +265,7 @@ async function compress(file,max=1000,q=.82){return new Promise((res,rej)=>{let 
 document.getElementById('photoInput').addEventListener('change',async e=>{let fs=[...e.target.files];if(!photoTarget||!fs.length)return;if(photoTarget.kind==='staff'||photoTarget.kind==='admin'){let d=await compress(fs[0],800,.84);await imgSet(photoTarget.key,d)}else if(photoTarget.kind==='machine'){let existing=(await imgGet(photoTarget.key))||[];for(let f of fs){existing.push(await compress(f,1200,.82))}await imgSet(photoTarget.key,existing)}e.target.value='';renderAll();if(photoTarget.after)photoTarget.after()});
 function pick(kind,key,after){photoTarget={kind,key,after};let f=document.getElementById('photoInput');f.multiple=kind==='machine';f.click()}
 function pickAdminPhoto(){pick('admin','admin',renderOrg)}
-function pickStaffPhoto(id){pick('staff','staff:'+id,()=>{renderStaff();renderTeams();renderOrg()})}
+function pickStaffPhoto(id){pick('staff','staffv55:'+id,()=>{renderStaff();renderTeams();renderOrg()})}
 function pickMachinePhotos(id){pick('machine','machine:'+id,()=>{renderMachines();renderTeams();renderOrg()})}
 async function renderStats(){
   let used=new Set(assignedStaffIds()),active=activeStaff(),absent=active.filter(x=>!used.has(x.id));
@@ -323,12 +334,12 @@ async function teamCard(t,edit=false){
         ${lead?`<div class="crewPerson leaderPerson">
           <div class="portraitWrap leaderPortrait">${lp?`<img loading="lazy" decoding="async" src="${lp}">`:`<div class="portraitPlaceholder">${esc((lead.nick||lead.name).slice(0,1))}</div>`}</div>
           <b>${esc(lead.nick||'')} ${esc(lead.name)}</b>
-          <small>Team Leader</small>
+          <small>Team Leader</small>${lead.roleMM?`<small class="mmLine">${esc(lead.roleMM)}</small>`:''}
         </div>`:''}
         ${members.join('')}
       </div>
       <div class="machineVisualGrid">${machines.join('')||'<div class="muted">ยังไม่มีเครื่องจักร</div>'}</div>
-      <div class="refTask"><span>🛠</span><div><b>งาน: ${esc(exportText(t.plan||'-'))}</b></div></div>
+      <div class="refTask"><span>🛠</span><div><b>งาน: ${esc(exportText(t.plan||'-'))}</b>${t.planMM?`<small class="mmLine">${esc(t.planMM)}</small>`:''}</div></div>
     </div>
   </div>`;
 }
@@ -785,5 +796,10 @@ window.addEventListener('pagehide',()=>{try{localStorage.setItem(STATE_KEY,JSON.
   object-position:center center!important;
 }
 .portraitWrap{background:#fff!important}
+
+
+/* v55: no camera badge; clean portrait only */
+.mmLine{display:block;color:#748398;font-size:11px!important;margin-top:2px;font-weight:500}
+.portraitWrap img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center center!important}
 
 </style></body></html>
