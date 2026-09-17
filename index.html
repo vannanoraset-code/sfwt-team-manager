@@ -15,20 +15,20 @@ label{font-size:12px;color:var(--muted);font-weight:700;display:block;margin:7px
 </style><meta name="sfwt-version" content="v56-app-first-photos-later"></head><body>
 <header><div class="brand"><img src="sft-logo.jpg"><div><h1>SFW&T บริหารทีมงาน</h1><small>บริษัท ศักวิเศษ เฟรม แอนด์ ทรัส จำกัด</small></div><div class="topActions"><button class="iconBtn" onclick="toggleLang()" id="langBtn">TH / မြန်မာ</button></div></div></header>
 <main>
-<section class="page active" id="dashboardPage"><div class="pageTitle"><div><h2>ภาพรวม <span class="langMM">အကျဉ်းချုပ်</span></h2><div id="dashboardDate" class="muted" style="font-weight:800;margin-top:3px"></div></div><button class="btn navy" onclick="exportPlan()">🖼️ ส่งออกรูป</button></div><div class="cards" id="stats"></div><div class="panel"><h3>งานวันนี้ <span class="langMM">ယနေ့အလုပ်အစီအစဉ်</span></h3><div id="todaySummary"></div></div><div class="panel"><h3>TEAM ทั้งหมด</h3><div id="dashboardTeams" class="teamGrid"></div></div></section>
+<section class="page active" id="dashboardPage"><div class="pageTitle"><h2>ภาพรวม <span class="langMM">အကျဉ်းချုပ်</span></h2><button class="btn navy" onclick="exportPlan()">🖼️ ส่งออกรูป</button></div><div class="cards" id="stats"></div><div class="panel"><h3>งานวันนี้ <span class="langMM">ယနေ့အလုပ်အစီအစဉ်</span></h3><div id="todaySummary"></div></div><div class="panel"><h3>ชุดทำงานทั้งหมด</h3><div id="dashboardTeams" class="teamGrid"></div></div></section>
 <section class="page" id="staffPage"><div class="pageTitle"><h2>พนักงาน <span class="langMM">ဝန်ထမ်း</span></h2><button class="btn red" onclick="openStaffEditor()">＋ เพิ่มพนักงาน</button></div><div class="panel"><div class="muted" style="margin-bottom:8px">📷 รูปพนักงานสามารถอัปโหลดทีหลังได้จากปุ่มกล้องในแต่ละคน ข้อมูลทีมจะไม่หาย</div><input id="staffSearch" placeholder="ค้นหาชื่อ / ตำแหน่ง" oninput="renderStaff()"></div><div id="staffList" class="list"></div></section>
 <section class="page" id="machinePage"><div class="pageTitle"><h2>เครื่องจักร <span class="langMM">စက်ယန္တရား</span></h2><button class="btn red" onclick="openMachineEditor()">＋ เพิ่มเครื่องจักร</button></div><div id="machineList" class="list"></div></section>
 <section class="page" id="teamsPage">
 <div class="pageTitle"><h2>จัดชุดทำงาน <span class="langMM">အဖွဲ့စီမံခြင်း</span></h2><button class="btn navy" onclick="exportPlan()">🖼️ ส่งออกรูป</button></div>
 <div class="panel">
-  <div class="grid2"><div><label>วันที่ทำงาน</label><input type="date" id="planDate" onchange="changePlanDate(this.value)"></div><div><label>สถานที่ / ไซต์งาน</label><input id="planSite" placeholder="ระบุสถานที่ทำงาน"></div></div>
+  <div class="grid2"><div><label>วันที่ทำงาน</label><input type="date" id="planDate"></div><div><label>สถานที่ / ไซต์งาน</label><input id="planSite" placeholder="ระบุสถานที่ทำงาน"></div></div>
   <label>รายละเอียดงานรวม</label><textarea id="planOverall" placeholder="รายละเอียดงานวันนี้" oninput="autoTranslate('planOverall','planOverallMM')"></textarea>
   <textarea id="planOverallMM" readonly style="display:none"></textarea>
   <button class="btn red full" onclick="savePlan()">💾 บันทึกงานวันนี้</button>
 </div>
 <div class="panel" style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-  <div><b>TEAM</b><div class="muted">TEAM A • TEAM B • TEAM C • TEAM D • TEAM E และเพิ่มต่อได้ตลอด</div></div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="openCheckin()">✅ เช็คอินคนงาน</button><button class="btn navy" onclick="addWorkTeam()">＋ เพิ่ม TEAM</button></div>
+  <div><b>ชุดทำงาน</b><div class="muted">A • B • C • D • E และเพิ่มต่อได้ตลอด</div></div>
+  <button class="btn navy" onclick="addWorkTeam()">＋ เพิ่มชุดทำงาน</button>
 </div>
 <div id="teamEditorGrid" class="teamGrid"></div>
 <div class="panel"><h3 style="margin-top:0">ประวัติการจัดชุดทำงานย้อนหลัง</h3><div id="historyList"></div></div>
@@ -39,7 +39,6 @@ label{font-size:12px;color:var(--muted);font-weight:700;display:block;margin:7px
 <input type="file" id="photoInput" accept="image/*" multiple hidden>
 <div class="modal" id="editModal"><div class="sheet"><div class="sheetHead"><h3 id="modalTitle">แก้ไข</h3><button class="closeBtn" onclick="closeModal()">← ย้อนกลับ / ปิด</button></div><div id="modalBody"></div></div></div>
 <script>
-// SFW&T V58 — recovery-safe check-in fix. Existing localStorage/IndexedDB data is preserved.
 const mm={dashboard:'အကျဉ်းချုပ်',plan:'အလုပ်အစီအစဉ်',staff:'ဝန်ထမ်း',machine:'စက်ယန္တရား',team:'အဖွဲ့',leader:'အဖွဲ့ခေါင်းဆောင်',member:'အဖွဲ့ဝင်',work:'အလုပ်အသေးစိတ်'};
 const seedStaff=[
 {id:'s1',name:'นาย.ณรงค์ คาวีดี',nick:'เชียร์',role:'หัวหน้าทีม / Team Leader',roleMM:'အဖွဲ့ခေါင်းဆောင်',lang:'TH',status:'active'},
@@ -76,28 +75,8 @@ function loadSavedState(){for(const k of [STATE_KEY,'sfwt_v40','sfwt_v39','sfwt_
 let state=loadSavedState()||{staff:seedStaff,machines:seedMachines,teams:seedTeams,plan:{date:new Date().toISOString().slice(0,10),site:'',overall:'',overallMM:''},admin:{name:'คุณ นรเศรษฐ์ ศักวิเศษ',role:'ผู้บริหาร / Administrator'},lang:'both'};
 state.staff ||= seedStaff;state.machines ||= seedMachines;state.teams ||= seedTeams;state.plan ||= {date:new Date().toISOString().slice(0,10),site:'',overall:'',overallMM:''};state.admin ||= {name:'คุณ นรเศรษฐ์ ศักวิเศษ',role:'ผู้บริหาร / Administrator'};
 function workLabel(i){let n=i+1,r='';while(n){n--;r=String.fromCharCode(65+n%26)+r;n=Math.floor(n/26)}return r}
-function localDateISO(d=new Date()){
-  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
-  return `${y}-${m}-${day}`;
-}
-state.checkins ||= {};
-// V58: check-in uses a stable person token (name + nickname), not array/order position.
-// Legacy ID-based check-ins remain readable so no old attendance data is discarded.
-function personToken(s){return 'person:'+String(s?.name||'').trim().toLowerCase()+'|'+String(s?.nick||'').trim().toLowerCase()}
-function checkedInIds(date=state.plan.date){return new Set(state.checkins[date]||[])}
-function isCheckedIn(person,date=state.plan.date){
-  const s=typeof person==='object'?person:staffBy(person), set=checkedInIds(date);
-  if(!s)return false;
-  return set.has(personToken(s)) || set.has(s.id); // backward compatible with V57
-}
-function reindexTeams(){
-  state.teams.forEach((t,i)=>{t.id=workLabel(i);t.zone='';t.name='TEAM '+t.id});
-}
-
 function normalizeWorksets(){if(!state._worksetsV41){[...state.teams].forEach((t,i)=>{t.id=workLabel(i);t.zone='';t.name='ชุดทำงาน '+t.id});state._worksetsV41=true;try{localStorage.setItem(STATE_KEY,JSON.stringify(state))}catch(e){}}}
 normalizeWorksets();
-reindexTeams();
-const _todayOnOpen=localDateISO(); if(!state._lastOpenedDate || state._lastOpenedDate!==_todayOnOpen){state.plan.date=_todayOnOpen;state._lastOpenedDate=_todayOnOpen;try{localStorage.setItem(STATE_KEY,JSON.stringify(state))}catch(e){}}
 const DB='sfwt-images-v1',STORE='images';let photoTarget=null;
 function db(){return new Promise((res,rej)=>{let q=indexedDB.open(DB,1);q.onupgradeneeded=()=>q.result.createObjectStore(STORE);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}
 async function imgSet(k,v){let d=await db();return new Promise((res,rej)=>{let t=d.transaction(STORE,'readwrite');t.objectStore(STORE).put(v,k);t.oncomplete=res;t.onerror=()=>rej(t.error)})}
@@ -168,7 +147,6 @@ try{
   localStorage.setItem('sfwt_backup_before_v54',JSON.stringify(state));
   localStorage.setItem('sfwt_backup_before_v55',JSON.stringify(state));
   localStorage.setItem('sfwt_backup_before_v56',JSON.stringify(state));
-  localStorage.setItem('sfwt_backup_before_v57',JSON.stringify(state));
   localStorage.setItem('sfwt_backup_latest',JSON.stringify(state));
 }catch(e){}
 
@@ -258,47 +236,23 @@ function renderHistory(){
   }).join('');
 }
 
-
-function openCheckin(){
-  const date=state.plan.date||localDateISO(), checked=checkedInIds(date);
-  const rows=activeStaff().map(s=>`<label style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid #e5e7eb">
-    <input style="width:22px;height:22px" type="checkbox" name="dailyCheckin" value="${esc(personToken(s))}" ${(checked.has(personToken(s))||checked.has(s.id))?'checked':''}>
-    <span><b>${esc(s.nick||s.name)}</b><small style="display:block">${esc(s.name)}</small></span>
-  </label>`).join('');
-  openModal('เช็คอินคนงาน • '+thaiWorkDate(date),
-    `<div class="panel"><b>ติ๊กเฉพาะคนที่เช็คอินแล้ววันนี้</b><div class="muted">วันที่ ${esc(thaiWorkDate(date))}</div></div>
-     <div class="panel">${rows||'<div class=muted>ไม่มีพนักงาน</div>'}</div>
-     <button class="btn navy full" onclick="saveCheckin()">💾 บันทึกเช็คอิน</button>`);
-}
-function saveCheckin(){
-  const date=state.plan.date||localDateISO();
-  state.checkins[date]=[...document.querySelectorAll('input[name=dailyCheckin]:checked')].map(x=>x.value);
-  closeModal();save();
-}
-function checkinSummary(){
-  const c=checkedInIds(), active=activeStaff();
-  return {checked:active.filter(s=>c.has(s.id)),waiting:active.filter(s=>!c.has(s.id))};
-}
-
 function teamOrder(a,b){return String(a.id).localeCompare(String(b.id),undefined,{numeric:true})}
 function orderedTeams(){return [...state.teams].sort(teamOrder)}
 function nextTeamId(){return workLabel(state.teams.length)}
-function addWorkTeam(){let id=nextTeamId();openModal('เพิ่ม TEAM '+id,`<label>ชื่อทีม</label><input id=newTeamName value="TEAM ${id}" readonly><label>รายละเอียดงาน (ภาษาไทย)</label><textarea id=newTeamPlan oninput="autoTranslate('newTeamPlan','newTeamPlanMM')"></textarea><label>ภาษาพม่า (แปลอัตโนมัติ)</label><textarea id=newTeamPlanMM readonly></textarea><button class="btn navy full" onclick="saveNewWorkTeam()">＋ เพิ่ม TEAM ${id}</button>`)}
-async function saveNewWorkTeam(){let id=nextTeamId(),plan=document.getElementById('newTeamPlan').value.trim();state.teams.push({id,zone:'',name:'TEAM '+id,leader:'',members:[],machines:[],plan,planMM:await translateTH(plan)});reindexTeams();saveHistorySnapshot();closeModal();save()}
+function addWorkTeam(){let id=nextTeamId();openModal('เพิ่มชุดทำงาน '+id,`<label>ชื่อชุดทำงาน</label><input id=newTeamName value="ชุดทำงาน ${id}"><label>รายละเอียดงาน (ภาษาไทย)</label><textarea id=newTeamPlan oninput="autoTranslate('newTeamPlan','newTeamPlanMM')"></textarea><label>ภาษาพม่า (แปลอัตโนมัติ)</label><textarea id=newTeamPlanMM readonly></textarea><button class="btn navy full" onclick="saveNewWorkTeam()">＋ เพิ่มชุดทำงาน ${id}</button>`)}
+async function saveNewWorkTeam(){let id=nextTeamId(),name=document.getElementById('newTeamName').value.trim()||('ชุดทำงาน '+id),plan=document.getElementById('newTeamPlan').value.trim();state.teams.push({id,zone:'',name,leader:'',members:[],machines:[],plan,planMM:await translateTH(plan)});saveHistorySnapshot();closeModal();save()}
 function deleteWorkTeam(id){
-  if(!confirm('ลบ TEAM '+id+' ?'))return;
-  state.teams=state.teams.filter(t=>t.id!==id);reindexTeams();saveHistorySnapshot();save();
+  if(!confirm('ลบชุดทำงาน '+id+' ?'))return;
+  state.teams=state.teams.filter(t=>t.id!==id);saveHistorySnapshot();save();
 }
 async function imageSrc(key){
-  // V58 recovery: never hide/delete old uploads. Read every historical staff-photo key.
   if(key.startsWith('staff:')){
-    const id=key.split(':')[1];
-    for(const k of ['staffv55:'+id,'staff:'+id,'staffv54:'+id,'staffv53:'+id,'staffv52:'+id,'staffv51:'+id,'staffv50:'+id]){
-      const v=await imgGet(k); if(v)return v;
-    }
+    let id=key.split(':')[1];
+    let fresh=await imgGet('staffv55:'+id);
+    if(fresh)return fresh;
     return '';
   }
-  const v=await imgGet(key);if(v)return v;
+  let v=await imgGet(key);if(v)return v;
   return '';
 }
 function showPage(btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.navBtn').forEach(x=>x.classList.remove('active'));document.getElementById(btn.dataset.page).classList.add('active');btn.classList.add('active');scrollTo(0,0);if(btn.dataset.page==='orgPage')renderOrg()}
@@ -315,8 +269,7 @@ function pickStaffPhoto(id){pick('staff','staffv55:'+id,()=>{renderStaff();rende
 function pickMachinePhotos(id){pick('machine','machine:'+id,()=>{renderMachines();renderTeams();renderOrg()})}
 async function renderStats(){
   let used=new Set(assignedStaffIds()),active=activeStaff(),absent=active.filter(x=>!used.has(x.id));
-  let ds=document.getElementById('dashboardDate');if(ds)ds.textContent='📅 '+thaiWorkDate(state.plan.date||localDateISO());
-  document.getElementById('stats').innerHTML=`<div class=stat><b>${state.staff.length}</b><small>พนักงาน / ဝန်ထမ်း</small></div><div class=stat><b>${state.machines.length}</b><small>เครื่องจักร / စက်</small></div><div class=stat><b>${state.teams.length}</b><small>TEAM / အဖွဲ့</small></div><div class=stat><b>${absent.length}</b><small>หยุดงาน / ขาดงาน</small></div>`;
+  document.getElementById('stats').innerHTML=`<div class=stat><b>${state.staff.length}</b><small>พนักงาน / ဝန်ထမ်း</small></div><div class=stat><b>${state.machines.length}</b><small>เครื่องจักร / စက်</small></div><div class=stat><b>${state.teams.length}</b><small>ชุดทำงาน / အဖွဲ့</small></div><div class=stat><b>${absent.length}</b><small>หยุดงาน / ขาดงาน</small></div>`;
   document.getElementById('todaySummary').innerHTML=`<b>${esc(state.plan.site||'ยังไม่ระบุไซต์')}</b><div class=muted>${esc(state.plan.overall||'ยังไม่ได้กรอกรายละเอียดแผนงาน')}</div><span class=langMM>${esc(state.plan.overallMM||'')}</span><div class="panel" style="margin-top:10px"><b>รายชื่อหยุดงาน ${absent.length} คน</b><div>${absent.length?absent.map(x=>esc(x.nick||x.name)).join(' • '):'ไม่มี'}</div></div>`;
 }
 async function staffCard(s){let p=await imageSrc('staff:'+s.id),a=attendanceStats(s.id),todayAssigned=new Set(assignedStaffIds()).has(s.id);return `<div class=personCard>${p?`<img class=avatar src="${p}">`:`<div class="avatar placeholder">${esc((s.nick||s.name).slice(0,2))}</div>`}<div class=grow><b>${esc(s.nick||'')} ${esc(s.name)}</b><small>${esc(s.role)}</small><span class=langMM>${esc(s.roleMM||'')}</span><small><b>${todayAssigned?'มาทำงาน':'หยุดงาน'}</b> • ประวัติ: ทำงาน ${a.work} วัน • หยุด ${a.off} วัน</small></div><button class=btn onclick="pickStaffPhoto('${s.id}')">📷</button><button class=btn onclick="openStaffEditor('${s.id}')">✏️</button></div>`}
@@ -330,12 +283,12 @@ async function openMachineEditor(id=''){let m=id?machBy(id):{id:nextId('m',state
 async function saveMachineEditor(id,exists){let name=document.getElementById('mName').value.trim();let o={id,name,nameMM:await translateTH(name),type:document.getElementById('mType').value.trim(),code:document.getElementById('mCode').value.trim(),note:document.getElementById('mNote').value.trim()};if(!o.name)return alert('กรุณาใส่ชื่อเครื่องจักร');if(exists)Object.assign(machBy(id),o);else state.machines.push(o);closeModal();save()}
 async function removeMachinePhoto(id,i){let pics=(await imgGet('machine:'+id))||[];pics.splice(i,1);await imgSet('machine:'+id,pics);openMachineEditor(id);renderAll()}
 function deleteMachine(id){if(!confirm('ลบเครื่องจักรนี้?'))return;state.machines=state.machines.filter(x=>x.id!==id);state.teams.forEach(t=>t.machines=t.machines.filter(x=>x!==id));imgDel('machine:'+id);closeModal();save()}
-function leaderOpts(sel,teamId=''){let used=usedStaffByOther(teamId);return `<option value="">-- เลือกหัวหน้า --</option>`+state.staff.filter(s=>s.status!=='resigned').map(s=>{let u=used.get(s.id),ci=isCheckedIn(s),blocked=u||!ci;return `<option value="${s.id}" ${s.id===sel?'selected':''} ${blocked?'disabled':''}>${esc(s.nick||s.name)} • ${esc(s.name)}${u?' — ใช้งานอยู่ '+u:(!ci?' — ยังไม่เช็คอิน':'')}</option>`}).join('')}
+function leaderOpts(sel,teamId=''){let used=usedStaffByOther(teamId);return `<option value="">-- เลือกหัวหน้า --</option>`+state.staff.filter(s=>s.status!=='resigned').map(s=>{let u=used.get(s.id);return `<option value="${s.id}" ${s.id===sel?'selected':''} ${u?'disabled':''}>${esc(s.nick||s.name)} • ${esc(s.name)}${u?' — ใช้งานอยู่ '+u:''}</option>`}).join('')}
 function openTeamEditor(id){
   let t=teamBy(id),usedS=usedStaffByOther(id),usedM=usedMachineByOther(id);
-  openModal('ปรับทีม '+id,`<label>ชื่อทีม</label><input id=tName value="TEAM ${esc(t.id)}" readonly>
+  openModal('ปรับทีม '+id,`<label>ชื่อชุดทำงาน</label><input id=tName value="${esc(t.name)}">
   <label>หัวหน้าทีม</label><select id=tLeader>${leaderOpts(t.leader,id)}</select>
-  <label>พนักงานในทีม (คนที่อยู่ทีมอื่นจะถูกล็อก)</label><div class=panel>${state.staff.filter(s=>s.status!=='resigned').map(s=>{let u=usedS.get(s.id),ci=isCheckedIn(s),blocked=u||!ci;return `<label style="display:flex;gap:8px;align-items:center;${blocked?'opacity:.45':''}"><input style="width:auto" type=checkbox name=member value="${s.id}" ${t.members.includes(s.id)&&ci?'checked':''} ${blocked?'disabled':''}> ${esc(s.nick||s.name)} — ${esc(s.role)} ${u?`<b>• ใช้งานอยู่ ${u}</b>`:(!ci?'<b>• ยังไม่เช็คอิน</b>':'')}</label>`}).join('')}</div>
+  <label>พนักงานในทีม (คนที่อยู่ทีมอื่นจะถูกล็อก)</label><div class=panel>${state.staff.filter(s=>s.status!=='resigned').map(s=>{let u=usedS.get(s.id);return `<label style="display:flex;gap:8px;align-items:center;${u?'opacity:.5':''}"><input style="width:auto" type=checkbox name=member value="${s.id}" ${t.members.includes(s.id)?'checked':''} ${u?'disabled':''}> ${esc(s.nick||s.name)} — ${esc(s.role)} ${u?`<b>• ใช้งานอยู่ ${u}</b>`:''}</label>`}).join('')}</div>
   <label>เครื่องจักรประจำทีม (คันที่อยู่ทีมอื่นจะถูกล็อก)</label><div class=panel>${state.machines.map(m=>{let u=usedM.get(m.id);return `<label style="display:flex;gap:8px;align-items:center;${u?'opacity:.5':''}"><input style="width:auto" type=checkbox name=mach value="${m.id}" ${t.machines.includes(m.id)?'checked':''} ${u?'disabled':''}> ${esc(m.name)} ${u?`<b>• ใช้งานอยู่ ${u}</b>`:''}</label>`}).join('')}</div>
   <label>รายละเอียดงานทีม (แก้ไขภาษาไทย)</label><textarea id=tPlan oninput="autoTranslate('tPlan','tPlanMM')">${esc(t.plan||'')}</textarea>
   <label>ภาษาพม่า (แปลอัตโนมัติ)</label><textarea id=tPlanMM readonly>${esc(t.planMM||'')}</textarea>
@@ -346,7 +299,7 @@ async function saveTeamEditor(id){
   members=[...document.querySelectorAll('input[name=member]:checked')].map(x=>x.value).filter(x=>x!==leader),
   machines=[...document.querySelectorAll('input[name=mach]:checked')].map(x=>x.value);
   let err=validateUniqueTeam(id,leader,members,machines);if(err)return alert('เลือกซ้ำไม่ได้: '+err);
-  t.name='TEAM '+t.id;t.zone='';t.leader=leader;t.members=members;t.machines=machines;
+  t.name=document.getElementById('tName').value.trim();t.zone='';t.leader=leader;t.members=members;t.machines=machines;
   t.plan=document.getElementById('tPlan').value;t.planMM=await translateTH(t.plan);saveHistorySnapshot();closeModal();save()
 }
 async function teamCard(t,edit=false){
@@ -374,7 +327,7 @@ async function teamCard(t,edit=false){
     <div class="teamDateBar">📅 วันที่ ${esc(thaiWorkDate(state.plan.date))}</div>
     <div class="refInner">
       <div class="refTitleRow">
-        <div><h3>TEAM ${esc(t.id)}</h3><div class="refLeaderText">${lead?`หัวหน้า: ${esc(lead.nick||lead.name)} / ${esc(lead.name)}`:'ยังไม่เลือกหัวหน้า'}</div></div>
+        <div><h3>${esc(t.name)}</h3><div class="refLeaderText">${lead?`หัวหน้า: ${esc(lead.nick||lead.name)} / ${esc(lead.name)}`:'ยังไม่เลือกหัวหน้า'}</div></div>
         ${edit?`<button class="btn compactEdit" onclick="openTeamEditor('${t.id}')">✏️ ปรับทีม</button>`:''}
       </div>
       <div class="crewRow">
@@ -396,14 +349,6 @@ async function renderTeams(){
   let d=[];for(let t of orderedTeams())d.push(await teamCard(t,false));
   document.getElementById('dashboardTeams').innerHTML=d.join('');
 }
-
-function changePlanDate(v){
-  if(!v)return;
-  state.plan.date=v;
-  try{localStorage.setItem(STATE_KEY,JSON.stringify(state))}catch(e){}
-  renderAll();
-}
-
 function loadPlanForm(){
   let d=document.getElementById('planDate'),site=document.getElementById('planSite'),ov=document.getElementById('planOverall'),mm=document.getElementById('planOverallMM');
   if(d)d.value=state.plan.date||'';
