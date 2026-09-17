@@ -39,6 +39,7 @@ label{font-size:12px;color:var(--muted);font-weight:700;display:block;margin:7px
 <input type="file" id="photoInput" accept="image/*" multiple hidden>
 <div class="modal" id="editModal"><div class="sheet"><div class="sheetHead"><h3 id="modalTitle">แก้ไข</h3><button class="closeBtn" onclick="closeModal()">← ย้อนกลับ / ปิด</button></div><div id="modalBody"></div></div></div>
 <script>
+// SFW&T V58 — recovery-safe check-in fix. Existing localStorage/IndexedDB data is preserved.
 const mm={dashboard:'အကျဉ်းချုပ်',plan:'အလုပ်အစီအစဉ်',staff:'ဝန်ထမ်း',machine:'စက်ယန္တရား',team:'အဖွဲ့',leader:'အဖွဲ့ခေါင်းဆောင်',member:'အဖွဲ့ဝင်',work:'အလုပ်အသေးစိတ်'};
 const seedStaff=[
 {id:'s1',name:'นาย.ณรงค์ คาวีดี',nick:'เชียร์',role:'หัวหน้าทีม / Team Leader',roleMM:'အဖွဲ့ခေါင်းဆောင်',lang:'TH',status:'active'},
@@ -80,8 +81,15 @@ function localDateISO(d=new Date()){
   return `${y}-${m}-${day}`;
 }
 state.checkins ||= {};
+// V58: check-in uses a stable person token (name + nickname), not array/order position.
+// Legacy ID-based check-ins remain readable so no old attendance data is discarded.
+function personToken(s){return 'person:'+String(s?.name||'').trim().toLowerCase()+'|'+String(s?.nick||'').trim().toLowerCase()}
 function checkedInIds(date=state.plan.date){return new Set(state.checkins[date]||[])}
-function isCheckedIn(id,date=state.plan.date){return checkedInIds(date).has(id)}
+function isCheckedIn(person,date=state.plan.date){
+  const s=typeof person==='object'?person:staffBy(person), set=checkedInIds(date);
+  if(!s)return false;
+  return set.has(personToken(s)) || set.has(s.id); // backward compatible with V57
+}
 function reindexTeams(){
   state.teams.forEach((t,i)=>{t.id=workLabel(i);t.zone='';t.name='TEAM '+t.id});
 }
@@ -254,7 +262,7 @@ function renderHistory(){
 function openCheckin(){
   const date=state.plan.date||localDateISO(), checked=checkedInIds(date);
   const rows=activeStaff().map(s=>`<label style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid #e5e7eb">
-    <input style="width:22px;height:22px" type="checkbox" name="dailyCheckin" value="${s.id}" ${checked.has(s.id)?'checked':''}>
+    <input style="width:22px;height:22px" type="checkbox" name="dailyCheckin" value="${esc(personToken(s))}" ${(checked.has(personToken(s))||checked.has(s.id))?'checked':''}>
     <span><b>${esc(s.nick||s.name)}</b><small style="display:block">${esc(s.name)}</small></span>
   </label>`).join('');
   openModal('เช็คอินคนงาน • '+thaiWorkDate(date),
@@ -282,13 +290,15 @@ function deleteWorkTeam(id){
   state.teams=state.teams.filter(t=>t.id!==id);reindexTeams();saveHistorySnapshot();save();
 }
 async function imageSrc(key){
+  // V58 recovery: never hide/delete old uploads. Read every historical staff-photo key.
   if(key.startsWith('staff:')){
-    let id=key.split(':')[1];
-    let fresh=await imgGet('staffv55:'+id);
-    if(fresh)return fresh;
+    const id=key.split(':')[1];
+    for(const k of ['staffv55:'+id,'staff:'+id,'staffv54:'+id,'staffv53:'+id,'staffv52:'+id,'staffv51:'+id,'staffv50:'+id]){
+      const v=await imgGet(k); if(v)return v;
+    }
     return '';
   }
-  let v=await imgGet(key);if(v)return v;
+  const v=await imgGet(key);if(v)return v;
   return '';
 }
 function showPage(btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.navBtn').forEach(x=>x.classList.remove('active'));document.getElementById(btn.dataset.page).classList.add('active');btn.classList.add('active');scrollTo(0,0);if(btn.dataset.page==='orgPage')renderOrg()}
@@ -320,12 +330,12 @@ async function openMachineEditor(id=''){let m=id?machBy(id):{id:nextId('m',state
 async function saveMachineEditor(id,exists){let name=document.getElementById('mName').value.trim();let o={id,name,nameMM:await translateTH(name),type:document.getElementById('mType').value.trim(),code:document.getElementById('mCode').value.trim(),note:document.getElementById('mNote').value.trim()};if(!o.name)return alert('กรุณาใส่ชื่อเครื่องจักร');if(exists)Object.assign(machBy(id),o);else state.machines.push(o);closeModal();save()}
 async function removeMachinePhoto(id,i){let pics=(await imgGet('machine:'+id))||[];pics.splice(i,1);await imgSet('machine:'+id,pics);openMachineEditor(id);renderAll()}
 function deleteMachine(id){if(!confirm('ลบเครื่องจักรนี้?'))return;state.machines=state.machines.filter(x=>x.id!==id);state.teams.forEach(t=>t.machines=t.machines.filter(x=>x!==id));imgDel('machine:'+id);closeModal();save()}
-function leaderOpts(sel,teamId=''){let used=usedStaffByOther(teamId);return `<option value="">-- เลือกหัวหน้า --</option>`+state.staff.filter(s=>s.status!=='resigned').map(s=>{let u=used.get(s.id),ci=isCheckedIn(s.id),blocked=u||!ci;return `<option value="${s.id}" ${s.id===sel?'selected':''} ${blocked?'disabled':''}>${esc(s.nick||s.name)} • ${esc(s.name)}${u?' — ใช้งานอยู่ '+u:(!ci?' — ยังไม่เช็คอิน':'')}</option>`}).join('')}
+function leaderOpts(sel,teamId=''){let used=usedStaffByOther(teamId);return `<option value="">-- เลือกหัวหน้า --</option>`+state.staff.filter(s=>s.status!=='resigned').map(s=>{let u=used.get(s.id),ci=isCheckedIn(s),blocked=u||!ci;return `<option value="${s.id}" ${s.id===sel?'selected':''} ${blocked?'disabled':''}>${esc(s.nick||s.name)} • ${esc(s.name)}${u?' — ใช้งานอยู่ '+u:(!ci?' — ยังไม่เช็คอิน':'')}</option>`}).join('')}
 function openTeamEditor(id){
   let t=teamBy(id),usedS=usedStaffByOther(id),usedM=usedMachineByOther(id);
   openModal('ปรับทีม '+id,`<label>ชื่อทีม</label><input id=tName value="TEAM ${esc(t.id)}" readonly>
   <label>หัวหน้าทีม</label><select id=tLeader>${leaderOpts(t.leader,id)}</select>
-  <label>พนักงานในทีม (คนที่อยู่ทีมอื่นจะถูกล็อก)</label><div class=panel>${state.staff.filter(s=>s.status!=='resigned').map(s=>{let u=usedS.get(s.id),ci=isCheckedIn(s.id),blocked=u||!ci;return `<label style="display:flex;gap:8px;align-items:center;${blocked?'opacity:.45':''}"><input style="width:auto" type=checkbox name=member value="${s.id}" ${t.members.includes(s.id)&&ci?'checked':''} ${blocked?'disabled':''}> ${esc(s.nick||s.name)} — ${esc(s.role)} ${u?`<b>• ใช้งานอยู่ ${u}</b>`:(!ci?'<b>• ยังไม่เช็คอิน</b>':'')}</label>`}).join('')}</div>
+  <label>พนักงานในทีม (คนที่อยู่ทีมอื่นจะถูกล็อก)</label><div class=panel>${state.staff.filter(s=>s.status!=='resigned').map(s=>{let u=usedS.get(s.id),ci=isCheckedIn(s),blocked=u||!ci;return `<label style="display:flex;gap:8px;align-items:center;${blocked?'opacity:.45':''}"><input style="width:auto" type=checkbox name=member value="${s.id}" ${t.members.includes(s.id)&&ci?'checked':''} ${blocked?'disabled':''}> ${esc(s.nick||s.name)} — ${esc(s.role)} ${u?`<b>• ใช้งานอยู่ ${u}</b>`:(!ci?'<b>• ยังไม่เช็คอิน</b>':'')}</label>`}).join('')}</div>
   <label>เครื่องจักรประจำทีม (คันที่อยู่ทีมอื่นจะถูกล็อก)</label><div class=panel>${state.machines.map(m=>{let u=usedM.get(m.id);return `<label style="display:flex;gap:8px;align-items:center;${u?'opacity:.5':''}"><input style="width:auto" type=checkbox name=mach value="${m.id}" ${t.machines.includes(m.id)?'checked':''} ${u?'disabled':''}> ${esc(m.name)} ${u?`<b>• ใช้งานอยู่ ${u}</b>`:''}</label>`}).join('')}</div>
   <label>รายละเอียดงานทีม (แก้ไขภาษาไทย)</label><textarea id=tPlan oninput="autoTranslate('tPlan','tPlanMM')">${esc(t.plan||'')}</textarea>
   <label>ภาษาพม่า (แปลอัตโนมัติ)</label><textarea id=tPlanMM readonly>${esc(t.planMM||'')}</textarea>
